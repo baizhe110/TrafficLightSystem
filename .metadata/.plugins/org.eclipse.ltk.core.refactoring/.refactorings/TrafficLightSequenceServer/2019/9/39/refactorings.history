@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;TrafficLightSequenceServer/src/TrafficLightSequence.c&apos; to &apos;TrafficLightSequenceServer.c&apos;" description="Rename resource &apos;TrafficLightSequence.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/TrafficLightSequence.c" name="TrafficLightSequenceServer.c" stamp="1569280313786" updateReferences="true"/>
+</session>

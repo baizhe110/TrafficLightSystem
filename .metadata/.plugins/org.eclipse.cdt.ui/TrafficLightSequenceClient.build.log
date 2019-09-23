@@ -1,8 +1,7 @@
-08:45:48 **** Build of configuration x86_64-debug for project TrafficLightSequence ****
-make -j8 all 
-qcc -Vgcc_ntox86_64 -c -Wp,-MMD,build/x86_64-debug/src/TrafficLightSequence.d,-MT,build/x86_64-debug/src/TrafficLightSequence.o -o build/x86_64-debug/src/TrafficLightSequence.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/TrafficLightSequence.c
-qcc -Vgcc_ntox86_64 -o build/x86_64-debug/TrafficLightSequence   build/x86_64-debug/src/TrafficLightSequence.o  
 09:11:12 **** Build of configuration x86_64-debug for project TrafficLightSequenceClient ****
 make -j8 all 
 qcc -Vgcc_ntox86_64 -c -Wp,-MMD,build/x86_64-debug/src/TrafficLightSequenceClient.d,-MT,build/x86_64-debug/src/TrafficLightSequenceClient.o -o build/x86_64-debug/src/TrafficLightSequenceClient.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/TrafficLightSequenceClient.c
 qcc -Vgcc_ntox86_64 -o build/x86_64-debug/TrafficLightSequenceClient   build/x86_64-debug/src/TrafficLightSequenceClient.o  
+
+09:11:13 Build Finished (took 301ms)
+

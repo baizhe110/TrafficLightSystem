@@ -28,3 +28,9 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\gerar\D
 
 !ENTRY org.eclipse.cdt.core 1 0 2019-09-24 08:45:50.638
 !MESSAGE Indexed 'TrafficLightSequence' (1 sources, 16 headers) in 0.499 sec: 1,161 declarations; 1,067 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2019-09-24 09:11:13.434
+!MESSAGE Indexed 'TrafficLightSequenceClient' (1 sources, 16 headers) in 0.155 sec: 1,161 declarations; 1,067 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2019-09-24 09:11:39.930
+!MESSAGE Indexed 'TrafficLightSequenceServer' (1 sources, 48 headers) in 0.427 sec: 5,897 declarations; 4,850 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
