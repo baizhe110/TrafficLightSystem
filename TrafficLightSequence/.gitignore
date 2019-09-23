@@ -6,3 +6,11 @@ translations/*.qm
 
 # IDE settings
 .settings/
+
+# files to ignore
+*.cproject
+*.project
+Makefile
+
+# folder
+build/
