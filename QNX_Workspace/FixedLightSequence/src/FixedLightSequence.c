@@ -40,50 +40,80 @@ enum states CurState;
 
 void Initialise()
 {
-	printf("In state0: EWR-NSR\n");
+	printf("Start of fixed light sequence\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething0()
 {
-	printf("In state1: EWR-NSR\n");
+	printf("In state0: EWR_NSR_EWTR_NSTR_0\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething1()
 {
-	printf("In state1: EWR-NSR\n");
+	printf("In state1: EWR_NSR_EWTG_NSTR_1\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething2()
 {
-	printf("In state2: EWG-NSR\n");
+	printf("In state2: EWR_NSR_EWTY_NSTR_2\n");
 	timer_settime(timer_id, 0, &itime2, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 
 }
 void DoSomething3()
 {
-	printf("In state3: EWY-NSR\n");
+	printf("In state3: EWR_NSR_EWTR_NSTR_3\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething4()
 {
-	printf("In state4: EWR-NSR\n");
+	printf("In state4: EWG_NSR_EWTR_NSTR_4\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething5()
 {
-	printf("In state5: EWR-NSG\n");
+	printf("In state5: EWY_NSR_EWTR_NSTR_5\n");
 	timer_settime(timer_id, 0, &itime2, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 void DoSomething6()
 {
-	printf("In state6: EWY-NSY\n");
+	printf("In state6: EWR_NSR_EWTR_NSTR_6\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+void DoSomething7()
+{
+	printf("In state7: EWR_NSR_EWTR_NSTG_7\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+void DoSomething8()
+{
+	printf("In state8: EWR_NSR_EWTR_NSTY_8\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+void DoSomething9()
+{
+	printf("In state9: EWR_NSR_EWTR_NSTR_9\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+void DoSomething10()
+{
+	printf("In state10: EWR_NSG_EWTR_NSTR_10\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+void DoSomething11()
+{
+	printf("In state11: EWR_NSY_EWTR_NSTR_11\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
@@ -95,9 +125,8 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 
 	//CurState = CurrentState;
 
-initialise();
 
-	switch (CurState)
+	switch (CurState){
 
 	case EWR_NSR_EWTR_NSTR_0:
 		DoSomething0();
@@ -140,12 +169,13 @@ initialise();
 		CurState = EWR_NSG_EWTR_NSTR_10;
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
-		Dosomething10();
+		DoSomething10();
 		CurState = EWR_NSY_EWTR_NSTR_11;
 		break;
 	case EWR_NSY_EWTR_NSTR_11:
 		DoSomething11();
-		CurState = EWR_NSY_EWTR_NSTR_0;
+		CurState = EWR_NSR_EWTR_NSTR_0;
+		break;
 	}
 	return CurState;
 }
@@ -196,6 +226,8 @@ int main(int argc, char *argv[])
 		itime2.it_value.tv_nsec = 0;    // 500 million nsecs = .5 secs
 		itime2.it_interval.tv_sec = 0;          // 1 second
 		itime2.it_interval.tv_nsec = 0; // 500 million nsecs = .5 secs
+
+		Initialise();
 
 	while (counter < Runtimes)
 	{
