@@ -39,7 +39,8 @@ enum states { EWR_NSR_EWTR_NSTR_0,
 	EWR_NSR_EWTR_NSTY_8,
 	EWR_NSR_EWTR_NSTR_9,
 	EWR_NSG_EWTR_NSTR_10,
-	EWR_NSY_EWTR_NSTR_11};
+	EWR_NSY_EWTR_NSTR_11,
+	EWR_NSR_EWTR_NSTR_12};
 enum states CurState;
 //--- --- --- ---
 
@@ -147,6 +148,13 @@ void DoSomething11()
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
 
+void DoSomething12()
+{
+	printf("In state12: EWR_NSR_EWTR_NSTR_12\n");
+	timer_settime(timer_id, 0, &itime1, NULL);
+	MsgReceive(chid, &msg, sizeof(msg), NULL);
+}
+
 enum states FixedLightSequence(void *CurrentState)
 
 {
@@ -228,19 +236,28 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 	case EWR_NSR_EWTR_NSTR_0:
 		DoSomething0();
 		pthread_mutex_lock(&mutex);
-		strcpy(NewCarReceive,NewCarGlobal);
+			strcpy(NewCarReceive,NewCarGlobal);
+			strcpy(NewCarGlobal,"aaa");
 		pthread_mutex_unlock(&mutex);
-//		printf("%s\n",NewCarGlobal);
-//		printf("%d\n",strcmp("ewt",NewCarGlobal));
-		if(strcmp("ewt",NewCarGlobal) != 1)
+		if(strcmp("ewt",NewCarReceive) == 0)
 		{
-			printf("Car waiting, east west right turn");
+			printf("Car waiting, east west right turn\n");
 			CurState = EWR_NSR_EWTG_NSTR_1;
 		}
-		else if(strcmp("ew",NewCarGlobal) != 1)
+		else if(strcmp("ew",NewCarReceive) == 0)
 		{
-			printf("Car waiting, east west");
+			printf("Car waiting, east west\n");
 			CurState = EWG_NSR_EWTR_NSTR_4;
+		}
+		else if(strcmp("nst",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south right turn\n");
+			CurState = EWR_NSR_EWTR_NSTG_7;
+		}
+		else if(strcmp("ns",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south\n");
+			CurState = EWR_NSG_EWTR_NSTR_10;
 		}
 		else
 		{
@@ -261,7 +278,29 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWG_NSR_EWTR_NSTR_4:
 		DoSomething4();
-		CurState = EWY_NSR_EWTR_NSTR_5;
+		pthread_mutex_lock(&mutex);
+			strcpy(NewCarReceive,NewCarGlobal);
+			strcpy(NewCarGlobal,"aaa");
+		pthread_mutex_unlock(&mutex);
+		if(strcmp("ewt",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west right turn\n");
+			CurState = EWY_NSR_EWTR_NSTR_5;
+		}
+		else if(strcmp("nst",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south right turn\n");
+			CurState = EWY_NSR_EWTR_NSTR_5;
+		}
+		else if(strcmp("ns",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south\n");
+			CurState = EWY_NSR_EWTR_NSTR_5;
+		}
+		else
+		{
+			CurState = EWG_NSR_EWTR_NSTR_4;
+		}
 		break;
 	case EWY_NSR_EWTR_NSTR_5:
 		DoSomething5();
@@ -269,7 +308,21 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSR_EWTR_NSTR_6:
 		DoSomething6();
-		CurState = EWR_NSR_EWTR_NSTG_7;
+		if(strcmp("ewt",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west right turn\n");
+			CurState = EWR_NSR_EWTG_NSTR_1;
+		}
+		else if(strcmp("nst",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south right turn\n");
+			CurState = EWR_NSR_EWTR_NSTG_7;
+		}
+		else if(strcmp("ns",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south\n");
+			CurState = EWR_NSG_EWTR_NSTR_10;
+		}
 		break;
 	case EWR_NSR_EWTR_NSTG_7:
 		DoSomething7();
@@ -285,11 +338,51 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
 		DoSomething10();
-		CurState = EWR_NSY_EWTR_NSTR_11;
+		pthread_mutex_lock(&mutex);
+			strcpy(NewCarReceive,NewCarGlobal);
+			strcpy(NewCarGlobal,"aaa");
+		pthread_mutex_unlock(&mutex);
+		if(strcmp("ewt",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west right turn\n");
+			CurState = EWR_NSY_EWTR_NSTR_11;
+		}
+		else if(strcmp("ew",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west\n");
+			CurState = EWR_NSY_EWTR_NSTR_11;
+		}
+		else if(strcmp("nst",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south right turn\n");
+			CurState = EWR_NSY_EWTR_NSTR_11;
+		}
+		else
+		{
+			CurState = EWR_NSG_EWTR_NSTR_10;
+		}
 		break;
 	case EWR_NSY_EWTR_NSTR_11:
 		DoSomething11();
-		CurState = EWR_NSR_EWTR_NSTR_0;
+		CurState = EWR_NSR_EWTR_NSTR_12;
+		break;
+	case EWR_NSR_EWTR_NSTR_12:
+		DoSomething12();
+		if(strcmp("ewt",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west right turn\n");
+			CurState = EWR_NSR_EWTG_NSTR_1;
+		}
+		else if(strcmp("ew",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west\n");
+			CurState = EWG_NSR_EWTR_NSTR_4;
+		}
+		else if(strcmp("nst",NewCarReceive) == 0)
+		{
+			printf("Car waiting, north south right turn\n");
+			CurState = EWR_NSR_EWTR_NSTG_7;
+		}
 		break;
 	}
 	return CurState;
@@ -299,7 +392,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 int main(int argc, char *argv[])
 {
 	printf("Fixed Sequence Traffic Lights State Machine\n");
-	int Runtimes=30, counter = 0;
+	int Runtimes=100, counter = 0;
 	enum states CurrentState=0;
 	int Sequence=1, OldSequence=0;
 
