@@ -151,6 +151,10 @@ initialise();
 }
 
 
+
+
+
+
 int main(int argc, char *argv[])
 {
 	printf("Fixed Sequence Traffic Lights State Machine\n");
