@@ -222,7 +222,7 @@ void *ex_server(void * val)
 
 
 			   // put your message handling code here and assemble a reply message
-			   sprintf(replymsg.buf, "Message received, msgnum = %d", msgnum);
+			   sprintf(replymsg.buf, "%d", msgnum);
 			   printf("Server received data packet with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
 				   fflush(stdout);
 				   key[0] = msg.data;

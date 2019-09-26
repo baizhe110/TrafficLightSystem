@@ -14,6 +14,8 @@
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
 char *progname = "timer_per1.c";
+//for command changing
+int mode = 0;
 
 //for massage passing
 int pid;
@@ -161,6 +163,8 @@ void *ex_client(void * val)
         else
         { // now process the reply
             printf("   -->Reply is: '%s'\n", reply.buf);
+            mode = reply.buf;
+            printf("current mode is %s", mode);
         }
 /*
         //testing reply chnages
