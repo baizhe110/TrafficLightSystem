@@ -50,7 +50,9 @@ char test1();
 
 char key[10];
 
-
+char buff[10]={};
+int rcvid=0;
+char msgnum;  	// no message received yet
 
 int main(int argc, char *argv[])
 {
@@ -76,6 +78,14 @@ int main(int argc, char *argv[])
 	while (counter < Runtimes)
 	{
 ;		sleep(1);
+	scanf("%d",&buff);
+
+	pthread_mutex_lock(&mutex);
+
+	msgnum = buff[0];
+
+	pthread_mutex_unlock(&mutex);
+	printf("buff now is %d\n", buff[0]);
 		counter++;
 	}
 
@@ -85,6 +95,7 @@ int main(int argc, char *argv[])
 
 void *ex_server(void * val)
 {
+
 	//file write code starts
 	    FILE *fp;
 	    struct IDs_data ids;
@@ -119,7 +130,7 @@ void *ex_server(void * val)
 
 
 		my_data msg;
-		int rcvid=0, msgnum=0;  	// no message received yet
+
 		int Stay_alive=0, living=0;	// server stays running (ignores _PULSE_CODE_DISCONNECT request)
 
 		my_reply replymsg; 			// replymsg structure for sending back to client
@@ -128,7 +139,9 @@ void *ex_server(void * val)
 
 		living =1;
 		while (living)
+
 		{
+
 		   // Do your MsgReceive's here now with the chid
 		   rcvid = MsgReceive(chid, &msg, sizeof(msg), NULL);
 
@@ -186,7 +199,8 @@ void *ex_server(void * val)
 		   // for messages:
 		   if(rcvid > 0) // if true then A message was received
 		   {
-			   msgnum++;
+
+
 
 			   // If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
 			   if (msg.hdr.type == _IO_CONNECT )
@@ -206,8 +220,9 @@ void *ex_server(void * val)
 
 			   // A message (presumably ours) received
 
+
 			   // put your message handling code here and assemble a reply message
-			   sprintf(replymsg.buf, "Message %d received", msgnum);
+			   sprintf(replymsg.buf, "Message received, msgnum = %d", msgnum);
 			   printf("Server received data packet with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
 				   fflush(stdout);
 				   key[0] = msg.data;
