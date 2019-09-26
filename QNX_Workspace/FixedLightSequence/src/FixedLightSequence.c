@@ -249,6 +249,11 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 			printf("Car waiting, east west\n");
 			CurState = EWG_NSR_EWTR_NSTR_4;
 		}
+		else if(strcmp("ewp",NewCarReceive) == 0)
+		{
+			printf("Car waiting, east west\n");
+			CurState = EWG_NSR_EWTR_NSTR_4;
+		}
 		else if(strcmp("nst",NewCarReceive) == 0)
 		{
 			printf("Car waiting, north south right turn\n");
