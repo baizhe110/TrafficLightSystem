@@ -251,7 +251,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		}
 		else if(strcmp("ewp",NewCarReceive) == 0)
 		{
-			printf("Car waiting, east west\n");
+			printf("Pedestrian waiting, north south\n");
 			CurState = EWG_NSR_EWTR_NSTR_4;
 		}
 		else if(strcmp("nst",NewCarReceive) == 0)
@@ -262,6 +262,11 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		else if(strcmp("ns",NewCarReceive) == 0)
 		{
 			printf("Car waiting, north south\n");
+			CurState = EWR_NSG_EWTR_NSTR_10;
+		}
+		else if(strcmp("nsp",NewCarReceive) == 0)
+		{
+			printf("Pedestrian waiting, north south\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
 		}
 		else
