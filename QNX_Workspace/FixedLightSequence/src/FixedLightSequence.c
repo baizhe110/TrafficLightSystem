@@ -6,6 +6,7 @@
 #include <sys/iofunc.h>
 #include <sys/netmgr.h>
 #include "defines.h"
+#include "FixedLightSequence.h"
 
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
@@ -20,6 +21,7 @@ typedef union
 timer_t                 timer_id;
 int                     chid;
 my_message_t            msg;
+
 
 void setTimerValues()
 {
@@ -226,23 +228,3 @@ void initTimer()
 	}
 }
 
-int main(int argc, char *argv[])
-{
-	printf("Fixed Sequence Traffic Lights State Machine\n");
-
-	int Runtimes=30, counter = 0;
-	enum states CurrentState=0; // Declaring the enum within the main
-	// means we will need to pass it by address
-
-	initTimer();
-
-	setTimerValues();
-
-	Initialise();
-
-	while (counter < Runtimes)
-	{
-		CurrentState = SingleStep_TrafficLight_SM( &CurrentState ); // pass address
-		counter++;
-	}
-}

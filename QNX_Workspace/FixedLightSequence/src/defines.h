@@ -8,7 +8,6 @@
 #ifndef SRC_DEFINES_H_
 #define SRC_DEFINES_H_
 
-
 // enums ********************************************
 enum states {
 	EWR_NSR_EWTR_NSTR_0,
@@ -29,6 +28,12 @@ enum substates {
 	INTERSECTION_NORMAL,
 	EWB_NSR_EWTR_NSTR_4_1,
 	EWR_NSB_EWTR_NSTR_10_1
+};
+
+enum intersection_mode {
+	FIXED,
+	SENSOR,
+	SPECIAL
 };
 
 // structs ****************************************
@@ -59,29 +64,7 @@ struct itimerspec itime1;
 struct Timervalues times;
 
 
-// functions **************************************************
-// initialisations
-void initTimer();
-void setTimerValues();
 
-// functions for each state
-void Initialise();
-void DoSomething0();
-void DoSomething1();
-void DoSomething2();
-void DoSomething3();
-void DoSomething4();
-void DoSomething5();
-void DoSomething6();
-void DoSomething7();
-void DoSomething8();
-void DoSomething9();
-void DoSomething10();
-void DoSomething11();
-
-void startOneTimeTimer(timer_t timerID, double time);
-
-enum states SingleStep_TrafficLight_SM(void *CurrentState);
 
 
 #endif /* SRC_DEFINES_H_ */
