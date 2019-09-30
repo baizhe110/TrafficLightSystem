@@ -67,7 +67,7 @@ void Initialise()
 
 void DoSomething0()
 {
-	printf("In state0: EWR_NSR_EWTR_NSTR_0\n");
+	printf("In state0: EWR_NSR_EWTR_NSTR_0 bla bla\n");
 	timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
