@@ -50,7 +50,7 @@ char test1();
 
 char key[10];
 
-char buff[10]={};
+int buff[10]={};
 int rcvid=0;
 char msgnum;  	// no message received yet
 
@@ -67,17 +67,16 @@ int main(int argc, char *argv[])
 	// create the producer and consumer threads
     //pthread_create (&th1, NULL, ex_test1, &val);
     //create server thread
+
     pthread_create (&th2_server, NULL, ex_server, &val);
     //create client thread
     //pthread_create (&th3_client, NULL, ex_client, &val);
 
-	int Runtimes=50, counter = 0;
-
 	currentState = state0;
 
-	while (counter < Runtimes)
+	while (1)
 	{
-;		sleep(1);
+	sleep(1);
 	scanf("%d",&buff);
 
 	pthread_mutex_lock(&mutex);
@@ -85,11 +84,9 @@ int main(int argc, char *argv[])
 	msgnum = buff[0];
 
 	pthread_mutex_unlock(&mutex);
-	printf("buff now is %d\n", buff[0]);
-		counter++;
+	printf("The mode command has been set to: %d\n", buff[0]);
 	}
 
-	printf("Finishing demo...");
 	return EXIT_SUCCESS;
 }
 
@@ -223,7 +220,7 @@ void *ex_server(void * val)
 
 			   // put your message handling code here and assemble a reply message
 			   sprintf(replymsg.buf, "%d", msgnum);
-			   printf("Server received data packet with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
+			   printf("Server received the current state with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
 				   fflush(stdout);
 				   key[0] = msg.data;
 				   sleep(1); // Delay the reply by a second (just for demonstration purposes)

@@ -1,3 +1,6 @@
+// this client will receive a command saved in 'mode' from server
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -137,21 +140,23 @@ void *ex_client(void * val)
     // Do whatever work you wanted with server connection
     while (1) // send data packets
     {
-    	gets(buff);
+    	scanf(" %c", &buff[0]);
+    	printf("%c\n", buff[0]);
 
     		pthread_mutex_lock(&mutex);
 
     		key[0] = buff[0];
 
     		pthread_mutex_unlock(&mutex);
-    		for (i=1; i <= 2; ++i)
+    		/*for (i=1; i <= 2; ++i)
     				{
-    					sprintf(buf, "%c", key[0]);			//put the message in a char[] so it can be sent
+    					//sprintf(buf, "%c",'g');			//put the message in a char[] so it can be sent
     					//printf("queue: '%s'\n", buf); 			//print the message to this processes terminal
     					msg.data=buf;
-    				}
+    				}*/
     	// the data we are sending is in msg.data
-        printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
+    	msg.data = key[0];
+        printf("Client (ID:%d), sending data packet with the integer value: %c \n", msg.ClientID, msg.data);
         fflush(stdout);
 
         if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
@@ -163,8 +168,10 @@ void *ex_client(void * val)
         else
         { // now process the reply
             printf("   -->Reply is: '%s'\n", reply.buf);
+            pthread_mutex_lock(&mutex);
             mode = reply.buf;
-            printf("current mode is %s", mode);
+            pthread_mutex_unlock(&mutex);
+            printf("current mode is %s\n", mode);
         }
 /*
         //testing reply chnages
