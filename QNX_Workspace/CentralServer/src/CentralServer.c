@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <sys/iofunc.h>
 #include <sys/netmgr.h>
+#include <sys/neutrino.h>
+#include <errno.h>
 
 #define Q_FLAGS O_RDWR | O_CREAT | O_EXCL
 #define Q_Mode S_IRUSR | S_IWUSR
@@ -35,44 +37,48 @@ enum states{
 	state0, state1, state2, state3, state4, state5, state6
 };
 enum states currentState;
+
+struct itimerspec       itime_a;
+timer_t                 timer_id;
+
 int pid;
 int chid;
+int client0Alive = 0;
+int checkClient0Counter = 0;
 
 pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
 
 
 
-//void *ex_test1(void * val);
+void *ex_timer(void * val);
 void *ex_server(void * val);
 //void *ex_client(void * val);
 
 char test1();
 
-char key[10];
+char client0mode[10];
 
 int buff[10]={};
 int rcvid=0;
-char msgnum;  	// no message received yet
+char msgnum;
 
 int main(int argc, char *argv[])
 {
 	char val = 'e';
-	key[0] = 'e';
+	client0mode[0] = 'e';
 	my_data msg;
 	printf("Central Controller message passing demo starts now...\n");
-	//pthread_t  th1;
+	pthread_t  th1_clientAliveChecking;
 	pthread_t  th2_server;
 	//pthread_t  th3_client;
 
-	// create the producer and consumer threads
-    //pthread_create (&th1, NULL, ex_test1, &val);
+    pthread_create (&th1_clientAliveChecking, NULL, ex_timer, &val);
     //create server thread
 
     pthread_create (&th2_server, NULL, ex_server, &val);
     //create client thread
     //pthread_create (&th3_client, NULL, ex_client, &val);
 
-	currentState = state0;
 
 	while (1)
 	{
@@ -196,7 +202,18 @@ void *ex_server(void * val)
 		   // for messages:
 		   if(rcvid > 0) // if true then A message was received
 		   {
-
+			   if(checkClient0Counter < 50)
+			   {
+				   pthread_mutex_lock(&mutex);
+				   checkClient0Counter++;
+				   pthread_mutex_unlock(&mutex);
+			   }
+			   else
+			   {
+				   pthread_mutex_lock(&mutex);
+				   checkClient0Counter = 0;
+				   pthread_mutex_unlock(&mutex);
+			   }
 
 
 			   // If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
@@ -222,7 +239,7 @@ void *ex_server(void * val)
 			   sprintf(replymsg.buf, "%d", msgnum);
 			   printf("Server received the current state with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
 				   fflush(stdout);
-				   key[0] = msg.data;
+				   client0mode[0] = msg.data;
 				   sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
 			   printf("\n    -----> replying with: '%s'\n",replymsg.buf);
@@ -241,94 +258,75 @@ void *ex_server(void * val)
 
 		return EXIT_SUCCESS;
 	}
-/*
-void *ex_client(void * val)
 
+
+void *ex_timer(void * val)
 {
-	//read file code starts
+	#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
-	    FILE *fp;
-	    struct IDs_data ids;
-	    int i;
-
-	    fp = fopen( "ids_file", "r" );
-	    if( fp != NULL ) {
-	        while( read_data( fp, &ids ) != 0 ) {
-	           // printf( "pid=%d\n", ids.p_id );
-				//printf( "chid=%d\n", ids.ch_id);
-	        	chid = ids.ch_id;
-	        	pid =  ids.p_id;
-	        }
-
-	        fclose( fp );
-
-	    }
-	//read file code ends
-    my_data msg;
-    my_reply reply;
-
-    msg.ClientID = 500;
-
-    int server_coid;
-    int index = 0;
-
-	printf("   --> Trying to connect (server) process which has a PID: %d\n",   pid);
-	printf("   --> on channel: %d\n\n", chid);
-	char buff[10] = {};
-	char buf[MESSAGESIZE] = {};
-	// set up message passing channel
-    server_coid = ConnectAttach(ND_LOCAL_NODE, pid, chid, _NTO_SIDE_CHANNEL, 0);
-	if (server_coid == -1)
+	typedef union
 	{
-        printf("\n    ERROR, could not connect to server!\n\n");
-        pthread_exit(EXIT_FAILURE);
+		struct _pulse   pulse;
+		// your other message structures would go here too
+	} my_message_t;
+
+	struct sigevent         event;
+	struct itimerspec       itime;
+	timer_t                 timer_id;
+	int                     chidTimer;
+	int                     rcvidTimer;
+	my_message_t            msg;
+
+	chidTimer = ChannelCreate(0); // Create a communications channel
+
+	event.sigev_notify = SIGEV_PULSE;
+
+	// create a connection back to ourselves for the timer to send the pulse on
+	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chidTimer, _NTO_SIDE_CHANNEL, 0);
+	int oldCheckClient0Counter = 0;
+	event.sigev_code = MY_PULSE_CODE;
+
+	oldCheckClient0Counter == checkClient0Counter;
+
+	if (timer_create(CLOCK_REALTIME, NULL, &timer_id) == -1)
+	{
+	   printf (stderr, "%s:  couldn't create a timer, errno %d\n",errno);
+	   perror (NULL);
+	   exit (EXIT_FAILURE);
+	}
+	//printf("Fixed Sequence Traffic Lights State Machine with Perodic Timer\n");
+
+	itime_a.it_value.tv_sec = 3;
+	itime_a.it_value.tv_nsec = 0;
+	itime_a.it_interval.tv_sec =3;
+	itime_a.it_interval.tv_nsec = 0;
+
+	timer_settime(timer_id, 0, &itime_a, NULL);
+
+	while(1)
+	{
+		// wait for message/pulse
+		rcvidTimer = MsgReceive(chidTimer, &msg, sizeof(msg), NULL);
+		if (rcvid == 0)
+		{
+			//recevied a pulse, check with 'code' filed
+			if (msg.pulse.code == MY_PULSE_CODE) // we got a pulse
+			{
+				if(oldCheckClient0Counter ==checkClient0Counter)
+				{
+					client0Alive = 1;
+					printf("client alive info has been updated to true\n");
+				}
+				else
+				{
+					client0Alive = 0;
+					printf("client alive info has been updated to false\n");
+				}
+			}
+		}
 	}
 
-
-    printf("Connection established to process with PID:%d, Ch:%d\n", pid, chid);
-
-    // We would have pre-defined data to stuff here
-    msg.hdr.type = 0x00;
-    msg.hdr.subtype = 0x00;
-
-    // Do whatever work you wanted with server connection
-    while (1) // send data packets
-    {
-    	gets(buff);
-
-    		pthread_mutex_lock(&mutex);
-
-    		key[0] = buff[0];
-
-    		pthread_mutex_unlock(&mutex);
-    		for (i=1; i <= 2; ++i)
-    				{
-    					sprintf(buf, "%c", key[0]);			//put the message in a char[] so it can be sent
-    					//printf("queue: '%s'\n", buf); 			//print the message to this processes terminal
-    					msg.data=buf;
-    				}
-    	// the data we are sending is in msg.data
-        printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
-        fflush(stdout);
-
-        if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
-        {
-            printf(" Error data '%d' NOT sent to server\n", msg.data);
-            	// maybe we did not get a reply from the server
-            break;
-        }
-        else
-        { // now process the reply
-            printf("   -->Reply is: '%s'\n", reply.buf);
-        }
-
-        //sleep(5);	// wait a few seconds before sending the next data packet
-    }
-
-    // Close the connection
-    printf("\n Sending message to server to tell it to close the connection\n");
-    ConnectDetach(server_coid);
-
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
-*/
+
+
