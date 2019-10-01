@@ -103,6 +103,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 				CurState = EWG_NSR_EWTR_NSTR_4;
 			}
 		}
+		DoSomething4_1();
 		break;
 	case EWY_NSR_EWTR_NSTR_5:
 		DoSomething5();
@@ -166,6 +167,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 				CurState = EWR_NSG_EWTR_NSTR_10;
 			}
 		}
+		DoSomething10_1();
 		break;
 	case EWR_NSY_EWTR_NSTR_11:
 		DoSomething11();
