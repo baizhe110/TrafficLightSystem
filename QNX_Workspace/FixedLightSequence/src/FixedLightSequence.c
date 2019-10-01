@@ -1,21 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <mqueue.h>
 #include <errno.h>
-#include <sys/iofunc.h>
-#include <sys/netmgr.h>
 
 #include "defines.h"
 #include "stateTasks.h"
 #include "FixedLightSequence.h"
-
-
-#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
-
-char *progname = "timer_per1.c";
-
-
 
 
 void setTimerValues()
@@ -35,19 +24,7 @@ void setTimerValues()
 	times.EWTY_car	= 2;
 	times.EWR_clear = 1;
 	times.EWTR_clear= 1;
-
-
 }
-void startOneTimeTimer(timer_t timerID, double time)
-{
-	double x = time;
-	x += 0.5e-9;
-	itime1.it_value.tv_sec = (long) x;
-	itime1.it_value.tv_nsec = (x - itime1.it_value.tv_sec) * 1000000000L;
-	//printf("%ld %ld\n", itime1.it_value.tv_sec, itime1.it_value.tv_nsec);
-	timer_settime(timerID, 0, &itime1, NULL);
-}
-//--- --- --- ---
 
 void Initialise()
 {
@@ -55,7 +32,6 @@ void Initialise()
 	startOneTimeTimer(timer_id, 2);
 	MsgReceive(chid, &msg, sizeof(msg), NULL);
 }
-
 
 enum states SingleStep_TrafficLight_SM(void *CurrentState)
 {
@@ -116,33 +92,3 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 	}
 	return CurState;
 }
-
-void initTimer()
-{
-	chid = ChannelCreate(0); // Create a communications channel
-
-	struct sigevent         event;
-	event.sigev_notify = SIGEV_PULSE;
-
-	// create a connection back to ourselves for the timer to send the pulse on
-	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid, _NTO_SIDE_CHANNEL, 0);
-	if (event.sigev_coid == -1)
-	{
-		printf(stderr, "%s:  couldn't ConnectAttach to self!\n", progname);
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
-	struct sched_param th_param;
-	pthread_getschedparam(pthread_self(), NULL, &th_param);
-	event.sigev_priority = th_param.sched_curpriority;    // old QNX660 version getprio(0);
-	event.sigev_code = MY_PULSE_CODE;
-
-	// create the timer, binding it to the event
-	if (timer_create(CLOCK_REALTIME, &event, &timer_id) == -1)
-	{
-		printf (stderr, "%s:  couldn't create a timer, errno %d\n", progname, errno);
-		perror (NULL);
-		exit (EXIT_FAILURE);
-	}
-}
-

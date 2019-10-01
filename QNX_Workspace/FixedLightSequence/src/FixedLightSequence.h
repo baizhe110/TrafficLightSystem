@@ -10,18 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 
 // functions **************************************************
 // initialisations
-void initTimer();
+
 void setTimerValues();
 
-// functions for each state
 void Initialise();
-
-
-void startOneTimeTimer(timer_t timerID, double time);
 
 enum states SingleStep_TrafficLight_SM(void *CurrentState);
 

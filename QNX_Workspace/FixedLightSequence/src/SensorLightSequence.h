@@ -9,7 +9,7 @@
 #define SRC_SENSORLIGHTSEQUENCE_H_
 
 enum states SensorDrivenLightSequence(void *CurrentState);
-void DoSomething12();
+
 void *keyboard(void *notused);
 
 #endif /* SRC_SENSORLIGHTSEQUENCE_H_ */

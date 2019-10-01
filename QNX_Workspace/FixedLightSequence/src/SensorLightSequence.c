@@ -1,18 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <mqueue.h>
 #include <errno.h>
-#include <sys/iofunc.h>
-#include <sys/netmgr.h>
 
 #include "defines.h"
 #include "stateTasks.h"
-
-
-#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
-
-char *prognames = "timer_per1.c";
+#include "SensorLightSequence.h"
 
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;  // needs to be set to PTHREAD_MUTEX_INITIALIZER;
@@ -21,7 +13,6 @@ char NewCarGlobal[3]="aaa";
 
 // for timer and message receive
 
-struct sigevent         event;
 
 void *keyboard(void *notused)
 {
@@ -39,7 +30,6 @@ void *keyboard(void *notused)
 enum states SensorDrivenLightSequence(void *CurrentState)
 {
 	enum states CurState = *(enum states*)CurrentState;
-	//CurState = CurrentState;
 
 	static char NewCarReceive[3];
 

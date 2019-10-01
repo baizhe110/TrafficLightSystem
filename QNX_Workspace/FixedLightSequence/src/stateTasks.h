@@ -8,8 +8,9 @@
 #ifndef SRC_STATETASKS_H_
 #define SRC_STATETASKS_H_
 
-
 #include <sys/iofunc.h>
+
+#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
 struct Timervalues{
 	double NSG_car;
@@ -33,13 +34,19 @@ struct Timervalues times;
 
 typedef union
 {
-	struct _pulse   pulse;
+	struct _pulse pulse;
 	// your other message structures would go here too
 } my_message_t;
 timer_t                 timer_id;
 int                     chid;
 my_message_t            msg;
 
+
+// timer variables
+struct itimerspec itime1;
+
+void initTimer();
+void startOneTimeTimer(timer_t timerID, double time);
 
 void DoSomething0();
 void DoSomething1();

@@ -21,8 +21,7 @@ enum states {
 	EWR_NSR_EWTR_NSTY_8,
 	EWR_NSR_EWTR_NSTR_9,
 	EWR_NSG_EWTR_NSTR_10,	// Peds Crossing
-	EWR_NSY_EWTR_NSTR_11,
-	EWR_NSR_EWTR_NSTR_12
+	EWR_NSY_EWTR_NSTR_11
 };
 
 enum substates {
@@ -37,19 +36,7 @@ enum intersection_mode {
 	SPECIAL
 };
 
-// structs ****************************************
-
-
 // global variables ****************************************
 enum states CurState, CurSubstate;
-
-// timer variables
-struct itimerspec itime1;
-
-
-
-
-
-
 
 #endif /* SRC_DEFINES_H_ */
