@@ -21,7 +21,8 @@ enum states {
 	EWR_NSR_EWTR_NSTY_8,
 	EWR_NSR_EWTR_NSTR_9,
 	EWR_NSG_EWTR_NSTR_10,	// Peds Crossing
-	EWR_NSY_EWTR_NSTR_11
+	EWR_NSY_EWTR_NSTR_11,
+	EWR_NSR_EWTR_NSTR_12
 };
 
 enum substates {
@@ -37,23 +38,7 @@ enum intersection_mode {
 };
 
 // structs ****************************************
-struct Timervalues{
-	double NSG_car;
-	double NSB_ped;
-	double NSTG_car;
-	double NSY_car;
-	double NSTY_car;
-	double NSR_clear;
-	double NSTR_clear;
 
-	double EWG_car;
-	double EWB_ped;
-	double EWTG_car;
-	double EWY_car;
-	double EWTY_car;
-	double EWR_clear;
-	double EWTR_clear;
-};
 
 // global variables ****************************************
 enum states CurState, CurSubstate;
@@ -61,7 +46,7 @@ enum states CurState, CurSubstate;
 // timer variables
 struct itimerspec itime1;
 
-struct Timervalues times;
+
 
 
 

@@ -19,18 +19,7 @@ void setTimerValues();
 
 // functions for each state
 void Initialise();
-void DoSomething0();
-void DoSomething1();
-void DoSomething2();
-void DoSomething3();
-void DoSomething4();
-void DoSomething5();
-void DoSomething6();
-void DoSomething7();
-void DoSomething8();
-void DoSomething9();
-void DoSomething10();
-void DoSomething11();
+
 
 void startOneTimeTimer(timer_t timerID, double time);
 

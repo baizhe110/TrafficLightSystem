@@ -8,8 +8,9 @@
 #include <pthread.h>
 #include "defines.h"
 #include "FixedLightSequence.h"
+#include "SensorLightSequence.h"
 
-enum intersection_mode mode = FIXED;
+enum intersection_mode mode = SENSOR;
 
 void *stateMachineThread()
 {
@@ -26,6 +27,9 @@ void *stateMachineThread()
 			counter++;
 			break;
 		case SENSOR:
+			printf("Sensor SM> \t");
+			CurrentState = SensorDrivenLightSequence( &CurrentState ); // pass address
+			counter++;
 			break;
 		default:
 			break;
@@ -36,7 +40,7 @@ void *stateMachineThread()
 // Intersection Node starting point
 int main(int argc, char *argv[])
 {
-	pthread_t stateMachine;
+	pthread_t stateMachine, keyboarInput;
 
 	printf("Intersection Node started with mode: %d\n", mode);
 
@@ -44,6 +48,7 @@ int main(int argc, char *argv[])
 	initTimer();
 	setTimerValues();
 
+	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
 
 	pthread_join(stateMachine,NULL);
