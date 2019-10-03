@@ -11,7 +11,7 @@
 
 #define BUF_SIZE 100
 #define QNET_ATTACH_POINT  "/net/VM_x86_Target02/dev/name/local/CentralServer"  // hostname using full path, change myname to the name used for server
-
+#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
 void *ex_client(void *sname_data);
 
