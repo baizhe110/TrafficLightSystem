@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     //pthread_create (&th3_client, NULL, ex_client, &val);
 
 
-	while (1)
+	while(1)
 	{
 	sleep(1);
 	scanf("%d",&buff);
@@ -303,7 +303,7 @@ void *ex_timer(void * val)
 
 	timer_settime(timer_id, 0, &itime_a, NULL);
 
-	while(1)
+	/*while(1)
 	{
 		// wait for message/pulse
 		rcvidTimer = MsgReceive(chidTimer, &msg, sizeof(msg), NULL);
@@ -324,7 +324,7 @@ void *ex_timer(void * val)
 				}
 			}
 		}
-	}
+	}*/
 
 	return EXIT_SUCCESS;
 }
