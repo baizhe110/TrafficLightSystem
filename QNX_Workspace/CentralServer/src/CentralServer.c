@@ -6,13 +6,21 @@
 #include <fcntl.h>
 #include <share.h>
 #include <pthread.h>
+#include <sys/netmgr.h>
 
 // Define what the channel is called. It will be located at <hostname>/dev/name/local/myname"
 // change myname to something unique for you (The client should be set to same name)
 #define ATTACH_POINT "CentralServer"
+#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
+char *prognames = "timer_per1.c";
 
 #define BUF_SIZE 100
 
+typedef union
+{
+	struct _pulse   pulse;
+	// your other message structures would go here too
+} my_message_t;
 
 typedef struct
 {
@@ -48,6 +56,59 @@ void *keyboard(void *notused)
 	}
 }
 
+void *ex_timerCheckAlive(void * val)
+{
+	struct sigevent         event;
+	struct itimerspec       periodicTime;
+	timer_t                 periodicTimer_id;
+	int                     chid;
+	my_message_t            msg;
+	chid = ChannelCreate(1); // Create a communications channel
+
+	//struct sigevent         event;
+	event.sigev_notify = SIGEV_PULSE;
+
+	// create a connection back to ourselves for the timer to send the pulse on
+	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid, _NTO_SIDE_CHANNEL, 0);
+	if (event.sigev_coid == -1)
+	{
+		printf(stderr, "%s:  couldn't ConnectAttach to self!\n", prognames);
+		perror(NULL);
+		pthread_exit(EXIT_FAILURE);
+	}
+	struct sched_param th_param;
+	pthread_getschedparam(pthread_self(), NULL, &th_param);
+	event.sigev_priority = th_param.sched_curpriority;    // old QNX660 version getprio(0);
+	event.sigev_code = MY_PULSE_CODE;
+
+	// create the timer, binding it to the event
+	if (timer_create(CLOCK_REALTIME, &event, &periodicTimer_id) == -1)
+	{
+		printf (stderr, "%s:  couldn't create a timer, errno %d\n", prognames, errno);
+		perror (NULL);
+		pthread_exit(EXIT_FAILURE);
+	}
+	// setup the timer
+	double x = 2;
+	x += 0.5e-9;
+	periodicTime.it_value.tv_sec = (long) x;
+	periodicTime.it_value.tv_nsec = (x - periodicTime.it_value.tv_sec) * 1000000000L;
+	periodicTime.it_interval.tv_sec = (long) x;
+	periodicTime.it_interval.tv_nsec = (x - periodicTime.it_interval.tv_sec) * 1000000000L;
+
+	printf("%ld %ld\n", periodicTime.it_value.tv_sec, periodicTime.it_value.tv_nsec);
+	timer_settime(periodicTimer_id, 0, &periodicTime, NULL);
+
+
+	while(1)
+	{
+		// wait for message/pulse
+		MsgReceive(chid, &msg, sizeof(msg), NULL);
+		printf("HELLO Checking if alive!!\n");
+	}
+	pthread_exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char *argv[])
 {
 	printf("Central Controller message passing demo starts now...\n");
@@ -61,9 +122,10 @@ int main(int argc, char *argv[])
 	printf("--> Machine hostname is: '%s'\n", hostnm);
 	printf("\n");
 	printf("Server running\n");
-	pthread_t  th1, keyboarInput;
+	pthread_t  th1, keyboarInput, checkThread;
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create (&th1, NULL, server, NULL);
+	pthread_create(&checkThread, NULL, ex_timerCheckAlive, NULL);
 	//int ret = 0;
 	//ret = server();
 	pthread_join(th1,NULL);
@@ -181,6 +243,7 @@ int server()
 			// put your message handling code here and assemble a reply message
 			sprintf(replymsg.buf, "Current Mode: %d", currentMode);
 			printf("Server received the current Intersection state with value of '%d' from client (ID:%d), ", msg.data, msg.ClientID);
+
 			fflush(stdout);
 			sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
@@ -196,6 +259,5 @@ int server()
 
 	// Remove the attach point name from the file system (i.e. /dev/name/local/<myname>)
 	name_detach(attach, 0);
-
 	pthread_exit(EXIT_SUCCESS);
 }
