@@ -9,13 +9,18 @@
 #include "defines.h"
 #include "FixedLightSequence.h"
 #include "SensorLightSequence.h"
+#include "communication.h"
+#include <sys/dispatch.h>
+#include <fcntl.h>
+#include <share.h>
 
-enum intersection_mode mode = SENSOR;
+
+//pthread_mutex_t mutex= PTHREAD_MUTEX_INITIALIZER;
+enum intersection_mode mode = FIXED;
 
 void *stateMachineThread()
 {
 	int Runtimes=30, counter = 0;
-	enum states CurrentState=0; // Declaring the enum within the main
 	// means we will need to pass it by address
 
 	while (counter < Runtimes)
@@ -37,6 +42,7 @@ void *stateMachineThread()
 	}
 }
 
+
 // Intersection Node starting point
 int main(int argc, char *argv[])
 {
@@ -44,13 +50,16 @@ int main(int argc, char *argv[])
 
 	printf("Intersection Node started with mode: %d\n", mode);
 
-
 	initTimer();
 	setTimerValues();
 
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
+	char *val = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+	//strcpy(val, QNET_ATTACH_POINT);
+	printf("val: %s \n", val);
+	pthread_t  th3_client;
+	pthread_create (&th3_client, NULL, ex_client, NULL);
 
 	pthread_join(stateMachine,NULL);
-
 }

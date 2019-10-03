@@ -1,322 +1,201 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <mqueue.h>
+#include <stdio.h>
 #include <errno.h>
 #include <sys/iofunc.h>
-#include <sys/netmgr.h>
+#include <sys/dispatch.h>
+#include <fcntl.h>
+#include <share.h>
+#include <pthread.h>
 
-#define Q_FLAGS O_RDWR | O_CREAT | O_EXCL
-#define Q_Mode S_IRUSR | S_IWUSR
+// Define what the channel is called. It will be located at <hostname>/dev/name/local/myname"
+// change myname to something unique for you (The client should be set to same name)
+#define ATTACH_POINT "CentralServer"
+
 #define BUF_SIZE 100
+
 
 typedef struct
 {
 	struct _pulse hdr; // Our real data comes after this header
 	int ClientID; // our data (unique id from client)
-    char data ;     // our data
+	int data;     // our data
 } my_data;
 
 typedef struct
 {
 	struct _pulse hdr;  // Our real data comes after this header
-    char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
+	char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
 } my_reply;
-struct IDs_data {
-    int p_id;
-    int ch_id;
-};
 
-size_t read_data( FILE *fp, struct IDs_data *p )
+int currentMode = 0;
+
+// prototypes
+int server();
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *keyboard(void *notused)
 {
-    return( fread( p, sizeof( struct IDs_data ), 1, fp ) );
+	char newMode[3];
+	while(1)
+	{
+		scanf(" %s",&newMode);
+		pthread_mutex_lock(&mutex);
+		currentMode = newMode[0]-'0';
+		//strcpy(NewCarGlobal,NewCarKey);
+		pthread_mutex_unlock(&mutex);
+		printf("Mode changed to '%d'\n", currentMode);
+	}
 }
-enum states{
-	state0, state1, state2, state3, state4, state5, state6
-};
-enum states currentState;
-int pid;
-int chid;
-
-pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
-
-
-
-//void *ex_test1(void * val);
-void *ex_server(void * val);
-//void *ex_client(void * val);
-
-char test1();
-
-char key[10];
-
-
 
 int main(int argc, char *argv[])
 {
-	char val = 'e';
-	key[0] = 'e';
-	my_data msg;
 	printf("Central Controller message passing demo starts now...\n");
-	//pthread_t  th1;
-	pthread_t  th2_server;
-	//pthread_t  th3_client;
+	printf ("--> The pid of this process is %d\n", getpid() );
 
-	// create the producer and consumer threads
-    //pthread_create (&th1, NULL, ex_test1, &val);
-    //create server thread
-    pthread_create (&th2_server, NULL, ex_server, &val);
-    //create client thread
-    //pthread_create (&th3_client, NULL, ex_client, &val);
+	char hostnm[100];
+	memset(hostnm, '\0', 100);
+	hostnm[99] = '\n';
+	gethostname(hostnm, sizeof(hostnm));
 
-	int Runtimes=50, counter = 0;
-
-	currentState = state0;
-
-	while (counter < Runtimes)
-	{
-;		sleep(1);
-		counter++;
-	}
-
-	printf("Finishing demo...");
-	return EXIT_SUCCESS;
+	printf("--> Machine hostname is: '%s'\n", hostnm);
+	printf("\n");
+	printf("Server running\n");
+	pthread_t  th1, keyboarInput;
+	pthread_create(&keyboarInput, NULL, keyboard, NULL);
+	pthread_create (&th1, NULL, server, NULL);
+	//int ret = 0;
+	//ret = server();
+	pthread_join(th1,NULL);
+	printf("Main (Server) Terminated....\n");
+	return 0;
 }
 
-void *ex_server(void * val)
+
+/*** Server code ***/
+int server()
 {
-	//file write code starts
-	    FILE *fp;
-	    struct IDs_data ids;
-	    int i;
+	name_attach_t *attach;
 
-	    pid= getpid();
-	    chid = ChannelCreate(_NTO_CHF_DISCONNECT);
-	    fp = fopen( "ids_file", "w" );
-	    if( fp != NULL ) {
-
-	        ids.p_id = pid;
-	        ids.ch_id = chid;
-	        printf("PID is %d\n", ids.p_id);
-	        printf("CHID is %d\n", ids.ch_id);
-
-	        fwrite( &ids, sizeof( struct IDs_data ), 1, fp );
-	        printf( "Server info file has created.\n", i );
-
-
-	        fclose( fp );
-		}
-
-	//file write code ends
-
-
-		if (chid == -1)  // _NTO_CHF_DISCONNECT flag used to allow detach
-		{
-		    printf("\nFailed to create communication channel on server\n");
-			pthread_exit(EXIT_FAILURE);
-		}
-
-
-
-		my_data msg;
-		int rcvid=0, msgnum=0;  	// no message received yet
-		int Stay_alive=0, living=0;	// server stays running (ignores _PULSE_CODE_DISCONNECT request)
-
-		my_reply replymsg; 			// replymsg structure for sending back to client
-		replymsg.hdr.type = 0x01;
-		replymsg.hdr.subtype = 0x00;
-
-		living =1;
-		while (living)
-		{
-		   // Do your MsgReceive's here now with the chid
-		   rcvid = MsgReceive(chid, &msg, sizeof(msg), NULL);
-
-		   if (rcvid == -1)  // Error condition, exit
-		   {
-			   printf("\nFailed to MsgReceive\n");
-			   break;
-		   }
-
-		   // did we receive a Pulse or message?
-		   // for Pulses:
-		   if (rcvid == 0)  //  Pulse received, work out what type
-		   {
-			   switch (msg.hdr.code)
-			   {
-				   case _PULSE_CODE_DISCONNECT:
-						// A client disconnected all its connections by running
-						// name_close() for each name_open()  or terminated
-					   if( Stay_alive == 0)
-					   {
-						   ConnectDetach(msg.hdr.scoid);
-						   printf("\nServer was told to Detach from ClientID:%d ...\n", msg.ClientID);
-						   living = 0; // kill while loop
-						   continue;
-					   }
-					   else
-					   {
-						   printf("\nServer received Detach pulse from ClientID:%d but rejected it ...\n", msg.ClientID);
-					   }
-					   break;
-
-				   case _PULSE_CODE_UNBLOCK:
-						// REPLY blocked client wants to unblock (was hit by a signal
-						// or timed out).  It's up to you if you reply now or later.
-					   printf("\nServer got _PULSE_CODE_UNBLOCK after %d, msgnum\n", msgnum);
-					   break;
-
-				   case _PULSE_CODE_COIDDEATH:  // from the kernel
-					   printf("\nServer got _PULSE_CODE_COIDDEATH after %d, msgnum\n", msgnum);
-					   break;
-
-				   case _PULSE_CODE_THREADDEATH: // from the kernel
-					   printf("\nServer got _PULSE_CODE_THREADDEATH after %d, msgnum\n", msgnum);
-					   break;
-
-				   default:
-					   // Some other pulse sent by one of your processes or the kernel
-					   printf("\nServer got some other pulse after %d, msgnum\n", msgnum);
-					   break;
-
-			   }
-			   continue;// go back to top of while loop
-		   }
-
-		   // for messages:
-		   if(rcvid > 0) // if true then A message was received
-		   {
-			   msgnum++;
-
-			   // If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
-			   if (msg.hdr.type == _IO_CONNECT )
-			   {
-				   MsgReply( rcvid, EOK, NULL, 0 );
-				   printf("\n gns service is running....");
-				   continue;	// go back to top of while loop
-			   }
-
-			   // Some other I/O message was received; reject it
-			   if (msg.hdr.type > _IO_BASE && msg.hdr.type <= _IO_MAX )
-			   {
-				   MsgError( rcvid, ENOSYS );
-				   printf("\n Server received and IO message and rejected it....");
-				   continue;	// go back to top of while loop
-			   }
-
-			   // A message (presumably ours) received
-
-			   // put your message handling code here and assemble a reply message
-			   sprintf(replymsg.buf, "Message %d received", msgnum);
-			   printf("Server received data packet with value of '%c' from client (ID:%d), ", msg.data, msg.ClientID);
-				   fflush(stdout);
-				   key[0] = msg.data;
-				   sleep(1); // Delay the reply by a second (just for demonstration purposes)
-
-			   printf("\n    -----> replying with: '%s'\n",replymsg.buf);
-			   MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
-		   }
-		   else
-		   {
-			   printf("\nERROR: Server received something, but could not handle it correctly\n");
-		   }
-
-		}
-		printf("\nServer received Destroy command\n");
-		// destroyed channel before exiting
-		ChannelDestroy(chid);
-
-
-		return EXIT_SUCCESS;
-	}
-/*
-void *ex_client(void * val)
-
-{
-	//read file code starts
-
-	    FILE *fp;
-	    struct IDs_data ids;
-	    int i;
-
-	    fp = fopen( "ids_file", "r" );
-	    if( fp != NULL ) {
-	        while( read_data( fp, &ids ) != 0 ) {
-	           // printf( "pid=%d\n", ids.p_id );
-				//printf( "chid=%d\n", ids.ch_id);
-	        	chid = ids.ch_id;
-	        	pid =  ids.p_id;
-	        }
-
-	        fclose( fp );
-
-	    }
-	//read file code ends
-    my_data msg;
-    my_reply reply;
-
-    msg.ClientID = 500;
-
-    int server_coid;
-    int index = 0;
-
-	printf("   --> Trying to connect (server) process which has a PID: %d\n",   pid);
-	printf("   --> on channel: %d\n\n", chid);
-	char buff[10] = {};
-	char buf[MESSAGESIZE] = {};
-	// set up message passing channel
-    server_coid = ConnectAttach(ND_LOCAL_NODE, pid, chid, _NTO_SIDE_CHANNEL, 0);
-	if (server_coid == -1)
+	// Create a local name (/dev/name/...)
+	if ((attach = name_attach(NULL, ATTACH_POINT, 0)) == NULL)
 	{
-        printf("\n    ERROR, could not connect to server!\n\n");
-        pthread_exit(EXIT_FAILURE);
+		printf("\nFailed to name_attach on ATTACH_POINT: %s \n", ATTACH_POINT);
+		printf("\n Possibly another server with the same name is already running !\n");
+		return EXIT_FAILURE;
 	}
 
+	printf("Server Listening for Clients on ATTACH_POINT: %s \n", ATTACH_POINT);
 
-    printf("Connection established to process with PID:%d, Ch:%d\n", pid, chid);
+	/*
+	 *  Server Loop
+	 */
+	my_data msg;
+	int rcvid=0, msgnum=0;  		// no message received yet
+	int Stay_alive=1, living=0;	// server stays running (ignores _PULSE_CODE_DISCONNECT request)
 
-    // We would have pre-defined data to stuff here
-    msg.hdr.type = 0x00;
-    msg.hdr.subtype = 0x00;
+	my_reply replymsg; // replymsg structure for sending back to client
+	replymsg.hdr.type = 0x01;
+	replymsg.hdr.subtype = 0x00;
 
-    // Do whatever work you wanted with server connection
-    while (1) // send data packets
-    {
-    	gets(buff);
+	living =1;
+	while (living)
+	{
+		// Do your MsgReceive's here now with the chid
+		rcvid = MsgReceive(attach->chid, &msg, sizeof(msg), NULL);
 
-    		pthread_mutex_lock(&mutex);
+		if (rcvid == -1)  // Error condition, exit
+		{
+			printf("\nFailed to MsgReceive\n");
+			break;
+		}
 
-    		key[0] = buff[0];
+		// did we receive a Pulse or message?
+		// for Pulses:
+		if (rcvid == 0)  //  Pulse received, work out what type
+		{
+			switch (msg.hdr.code)
+			{
+			case _PULSE_CODE_DISCONNECT:
+				// A client disconnected all its connections by running
+				// name_close() for each name_open()  or terminated
+				if( Stay_alive == 0)
+				{
+					ConnectDetach(msg.hdr.scoid);
+					printf("\nServer was told to Detach from ClientID:%d ...\n", msg.ClientID);
+					living = 0; // kill while loop
+					continue;
+				}
+				else
+				{
+					printf("\nServer received Detach pulse from ClientID:%d but rejected it ...\n", msg.ClientID);
+				}
+				break;
 
-    		pthread_mutex_unlock(&mutex);
-    		for (i=1; i <= 2; ++i)
-    				{
-    					sprintf(buf, "%c", key[0]);			//put the message in a char[] so it can be sent
-    					//printf("queue: '%s'\n", buf); 			//print the message to this processes terminal
-    					msg.data=buf;
-    				}
-    	// the data we are sending is in msg.data
-        printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
-        fflush(stdout);
+			case _PULSE_CODE_UNBLOCK:
+				// REPLY blocked client wants to unblock (was hit by a signal
+				// or timed out).  It's up to you if you reply now or later.
+				printf("\nServer got _PULSE_CODE_UNBLOCK after %d, msgnum\n", msgnum);
+				break;
 
-        if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
-        {
-            printf(" Error data '%d' NOT sent to server\n", msg.data);
-            	// maybe we did not get a reply from the server
-            break;
-        }
-        else
-        { // now process the reply
-            printf("   -->Reply is: '%s'\n", reply.buf);
-        }
+			case _PULSE_CODE_COIDDEATH:  // from the kernel
+				printf("\nServer got _PULSE_CODE_COIDDEATH after %d, msgnum\n", msgnum);
+				break;
 
-        //sleep(5);	// wait a few seconds before sending the next data packet
-    }
+			case _PULSE_CODE_THREADDEATH: // from the kernel
+				printf("\nServer got _PULSE_CODE_THREADDEATH after %d, msgnum\n", msgnum);
+				break;
 
-    // Close the connection
-    printf("\n Sending message to server to tell it to close the connection\n");
-    ConnectDetach(server_coid);
+			default:
+				// Some other pulse sent by one of your processes or the kernel
+				printf("\nServer got some other pulse after %d, msgnum\n", msgnum);
+				break;
 
-    return EXIT_SUCCESS;
+			}
+			continue;// go back to top of while loop
+		}
+
+		// for messages:
+		if(rcvid > 0) // if true then A message was received
+		{
+			msgnum++;
+
+			// If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
+			if (msg.hdr.type == _IO_CONNECT )
+			{
+				MsgReply( rcvid, EOK, NULL, 0 );
+				printf("\n gns service is running....");
+				continue;	// go back to top of while loop
+			}
+
+			// Some other I/O message was received; reject it
+			if (msg.hdr.type > _IO_BASE && msg.hdr.type <= _IO_MAX )
+			{
+				MsgError( rcvid, ENOSYS );
+				printf("\n Server received and IO message and rejected it....");
+				continue;	// go back to top of while loop
+			}
+
+			// A message (presumably ours) received
+
+			// put your message handling code here and assemble a reply message
+			sprintf(replymsg.buf, "Current Mode: %d", currentMode);
+			printf("Server received the current Intersection state with value of '%d' from client (ID:%d), ", msg.data, msg.ClientID);
+			fflush(stdout);
+			sleep(1); // Delay the reply by a second (just for demonstration purposes)
+
+			printf("\n    -----> replying with: '%s'\n",replymsg.buf);
+			MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
+		}
+		else
+		{
+			printf("\nERROR: Server received something, but could not handle it correctly\n");
+		}
+
+	}
+
+	// Remove the attach point name from the file system (i.e. /dev/name/local/<myname>)
+	name_detach(attach, 0);
+
+	pthread_exit(EXIT_SUCCESS);
 }
-*/

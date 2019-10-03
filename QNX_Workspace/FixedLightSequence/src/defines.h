@@ -37,6 +37,6 @@ enum intersection_mode {
 };
 
 // global variables ****************************************
-enum states CurState, CurSubstate;
+enum states CurrentState, CurSubstate;
 
 #endif /* SRC_DEFINES_H_ */
