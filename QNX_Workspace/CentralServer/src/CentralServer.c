@@ -7,6 +7,7 @@
 #include <sys/netmgr.h>
 #include <sys/neutrino.h>
 #include <errno.h>
+#include <time.h>
 
 #define Q_FLAGS O_RDWR | O_CREAT | O_EXCL
 #define Q_Mode S_IRUSR | S_IWUSR
@@ -33,10 +34,6 @@ size_t read_data( FILE *fp, struct IDs_data *p )
 {
     return( fread( p, sizeof( struct IDs_data ), 1, fp ) );
 }
-enum states{
-	state0, state1, state2, state3, state4, state5, state6
-};
-enum states currentState;
 
 struct itimerspec       itime_a;
 timer_t                 timer_id;
@@ -52,9 +49,6 @@ pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
 
 void *ex_timer(void * val);
 void *ex_server(void * val);
-//void *ex_client(void * val);
-
-char test1();
 
 char client0mode[10];
 
@@ -68,17 +62,11 @@ int main(int argc, char *argv[])
 	client0mode[0] = 'e';
 	my_data msg;
 	printf("Central Controller message passing demo starts now...\n");
-	pthread_t  th1_clientAliveChecking;
-	pthread_t  th2_server;
-	//pthread_t  th3_client;
+	pthread_t  th2_clientAliveChecking;
+	pthread_t  th1_server;
 
-    pthread_create (&th1_clientAliveChecking, NULL, ex_timer, &val);
-    //create server thread
-
-    pthread_create (&th2_server, NULL, ex_server, &val);
-    //create client thread
-    //pthread_create (&th3_client, NULL, ex_client, &val);
-
+    pthread_create (&th1_server, NULL, ex_server, &val);
+    pthread_create (&th2_clientAliveChecking, NULL, ex_timer, &val);
 
 	while(1)
 	{
@@ -254,14 +242,16 @@ void *ex_server(void * val)
 		printf("\nServer received Destroy command\n");
 		// destroyed channel before exiting
 		ChannelDestroy(chid);
+		printf("Cummunication channel destoried");
 
 
 		return EXIT_SUCCESS;
 	}
 
 
-void *ex_timer(void * val)
+/*void *ex_timer(void * val)
 {
+
 	#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
 	typedef union
@@ -276,8 +266,10 @@ void *ex_timer(void * val)
 	int                     chidTimer;
 	int                     rcvidTimer;
 	my_message_t            msg;
-
+	printf("the timer channel has NOT created.");
 	chidTimer = ChannelCreate(0); // Create a communications channel
+	printf("the timer channel has created.");
+
 
 	event.sigev_notify = SIGEV_PULSE;
 
@@ -286,7 +278,7 @@ void *ex_timer(void * val)
 	int oldCheckClient0Counter = 0;
 	event.sigev_code = MY_PULSE_CODE;
 
-	oldCheckClient0Counter == checkClient0Counter;
+	oldCheckClient0Counter = checkClient0Counter;
 
 	if (timer_create(CLOCK_REALTIME, NULL, &timer_id) == -1)
 	{
@@ -303,11 +295,12 @@ void *ex_timer(void * val)
 
 	timer_settime(timer_id, 0, &itime_a, NULL);
 
-	/*while(1)
+
+	while(1)
 	{
 		// wait for message/pulse
 		rcvidTimer = MsgReceive(chidTimer, &msg, sizeof(msg), NULL);
-		if (rcvid == 0)
+		if (rcvidTimer == 0)
 		{
 			//recevied a pulse, check with 'code' filed
 			if (msg.pulse.code == MY_PULSE_CODE) // we got a pulse
@@ -321,12 +314,38 @@ void *ex_timer(void * val)
 				{
 					client0Alive = 0;
 					printf("client alive info has been updated to false\n");
+
 				}
 			}
 		}
-	}*/
+	}
 
 	return EXIT_SUCCESS;
-}
+}*/
+void *ex_timer(void * val)
+{
+	int oldCheckClient0Counter = checkClient0Counter;
 
+	int number_of_seconds = 30;
+	//Converting time into milli_seconds
+	int milli_seconds = 1000 * number_of_seconds;
+    // Start the timer and the loop
+	//while (1){
+		clock_t start_time = clock();
+		while(clock() <= start_time + milli_seconds){;}
+		if(clock() >= start_time + milli_seconds){
+			if(oldCheckClient0Counter != checkClient0Counter)
+			{
+				client0Alive = 1;
+				printf("client alive info has been updated to true\n");
+			}
+			else
+			{
+				client0Alive = 0;
+				printf("client alive info has been updated to false\n");
+			}
+		}
+	//}
+	return EXIT_SUCCESS;
+}
 
