@@ -76,7 +76,7 @@ void *ex_client(void *sname_data)
 
 	while((server_coid = name_open(sname, 0)) == -1)
 	{
-		printf("Could not connect to server!\n");
+		//printf("Could not connect to server!\n");
 		sleep(1);
 	}
 

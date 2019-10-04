@@ -40,6 +40,12 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 			switchingMode = 0;
 			CurrentMode = desiredMode;
 			printf("Successfully switched Mode\n");
+			if (CurrentMode == FIXED) {
+				printf("Trying to sync with other nodes");
+				// wait until data from central server signals all nodes ready
+				// if server not availiable continue manually
+				// if takes more than xxx time to manually
+			}
 		}
 		break;
 	case EWR_NSR_EWTG_NSTR_1:

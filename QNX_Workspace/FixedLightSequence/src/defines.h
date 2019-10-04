@@ -24,6 +24,14 @@ enum states {
 	EWR_NSY_EWTR_NSTR_11
 };
 
+enum sensorInput {
+	EW_sensor,
+	EWT_sensor,
+	NS_sensor,
+	NST_sensor,
+	TRAIN_sensor
+};
+
 enum substates {
 	INTERSECTION_NORMAL,
 	EWB_NSR_EWTR_NSTR_4_1,
@@ -39,6 +47,8 @@ enum intersection_modes {
 // global variables ****************************************
 enum states CurrentState, CurSubstate;
 enum intersection_modes CurrentMode, desiredMode;
+enum sensorInput currentSensor; // clear sensor input after working through it
+
 int switchingMode;
 
 #endif /* SRC_DEFINES_H_ */
