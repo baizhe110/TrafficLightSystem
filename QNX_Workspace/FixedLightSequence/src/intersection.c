@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	//strcpy(val, QNET_ATTACH_POINT);
 	printf("val: %s \n", val);
 	pthread_t  th3_client;
-	pthread_create (&th3_client, NULL, ex_client, NULL);
+	pthread_create (&th3_client, NULL, ex_client, val);
 
 	pthread_join(stateMachine,NULL);
 }

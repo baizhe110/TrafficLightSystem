@@ -15,6 +15,7 @@
 #include <time.h>
 #include <sys/netmgr.h>
 #include <sys/neutrino.h>
+#include <errno.h>
 
 char *prognames = "timer_per1.c";
 
@@ -62,22 +63,21 @@ void *ex_client(void *sname_data)
 	timer_settime(periodicTimer_id, 0, &periodicTime, NULL);
 
 
-
-
-	char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+	char *sname = (char *)sname_data;
 	my_data msg;
 	my_reply reply;
-
 	msg.ClientID = 800; // unique number for this client (optional)
 
 	int server_coid;
 	int index = 0;
 
 	printf("  ---> Trying to connect to server named: %s\n", sname);
-	if ((server_coid = name_open(sname, 0)) == -1)
+
+	while((server_coid = name_open(sname, 0)) == -1)
 	{
-		printf("\n    ERROR, could not connect to server!\n\n");
-		pthread_exit(EXIT_FAILURE);
+		printf("Could not connect to server!\n");
+		sleep(1);
 	}
 
 	printf("Connection established to: %s\n", sname);
@@ -100,8 +100,22 @@ void *ex_client(void *sname_data)
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
 		{
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
+			printf("SendMsg:  couldn't create a timer, errno %d\n", errno);
+			if (errno==3) {
+				printf("trying to reconntect to server");
+				while((server_coid = name_open(sname, 0)) == -1)
+				{
+					printf("Could not reconnect to server!\n");
+					sleep(1);
+				}
+				continue;
+			}
+			else
+			{
+				break;
+			}
 			// maybe we did not get a reply from the server
-			break;
+
 		}
 		else
 		{ // now process the reply
