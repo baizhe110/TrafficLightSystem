@@ -26,12 +26,6 @@ void setTimerValues()
 	times.EWTR_clear= 1;
 }
 
-void Initialise()
-{
-	printf("Start of fixed light sequence\n");
-	startOneTimeTimer(timer_id, 2);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
-}
 
 enum states SingleStep_TrafficLight_SM(void *CurrentState)
 {
@@ -57,6 +51,10 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSR_EWTR_NSTR_3;
 		break;
 	case EWR_NSR_EWTR_NSTR_3:
+		if (switchingMode == 1) {
+			CurState = EWR_NSR_EWTR_NSTR_0;
+			break;
+		}
 		DoSomething3();
 		CurState = EWG_NSR_EWTR_NSTR_4;
 		break;
@@ -70,6 +68,10 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSR_EWTR_NSTR_6;
 		break;
 	case EWR_NSR_EWTR_NSTR_6:
+		if (switchingMode == 1) {
+			CurState = EWR_NSR_EWTR_NSTR_0;
+			break;
+		}
 		DoSomething6();
 		CurState = EWR_NSR_EWTR_NSTG_7;
 		break;
@@ -82,6 +84,10 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSR_EWTR_NSTR_9;
 		break;
 	case EWR_NSR_EWTR_NSTR_9:
+		if (switchingMode == 1) {
+			CurState = EWR_NSR_EWTR_NSTR_0;
+			break;
+		}
 		DoSomething9();
 		CurState = EWR_NSG_EWTR_NSTR_10;
 		break;

@@ -27,7 +27,7 @@ void *stateMachineThread()
 	{
 		if (switchingMode == 1) {
 			CurrentMode = FIXED;
-			printf("Changed Mode to FIXED\n");
+			printf("Changing mode...\n");
 		}
 		switch (CurrentMode) {
 		case FIXED:
@@ -45,7 +45,6 @@ void *stateMachineThread()
 			printf("Special state> %d\t", CurrentState);
 			while(switchingMode == 0)
 			{
-
 			}
 			break;
 		default:

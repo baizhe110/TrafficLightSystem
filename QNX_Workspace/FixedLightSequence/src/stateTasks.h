@@ -32,14 +32,8 @@ struct Timervalues{
 
 struct Timervalues times;
 
-typedef union
-{
-	struct _pulse pulse;
-	// your other message structures would go here too
-} my_message_t;
 timer_t                 timer_id;
 int                     chid;
-my_message_t            msg;
 
 
 // timer variables
