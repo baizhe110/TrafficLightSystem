@@ -30,7 +30,7 @@ enum substates {
 	EWR_NSB_EWTR_NSTR_10_1
 };
 
-enum intersection_mode {
+enum intersection_modes {
 	FIXED,
 	SENSOR,
 	SPECIAL
@@ -38,5 +38,7 @@ enum intersection_mode {
 
 // global variables ****************************************
 enum states CurrentState, CurSubstate;
+enum intersection_modes CurrentMode, desiredMode;
+int switchingMode;
 
 #endif /* SRC_DEFINES_H_ */

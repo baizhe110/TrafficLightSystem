@@ -42,6 +42,11 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 	case EWR_NSR_EWTR_NSTR_0:
 		DoSomething0();
 		CurState = EWR_NSR_EWTG_NSTR_1;
+		if (switchingMode == 1) {
+			switchingMode = 0;
+			CurrentMode = desiredMode;
+			printf("Successfully switched Mode\n");
+		}
 		break;
 	case EWR_NSR_EWTG_NSTR_1:
 		DoSomething1();

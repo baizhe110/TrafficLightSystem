@@ -16,7 +16,7 @@
 
 
 //pthread_mutex_t mutex= PTHREAD_MUTEX_INITIALIZER;
-enum intersection_mode mode = FIXED;
+
 
 void *stateMachineThread()
 {
@@ -25,7 +25,11 @@ void *stateMachineThread()
 
 	while (counter < Runtimes)
 	{
-		switch (mode) {
+		if (switchingMode == 1) {
+			CurrentMode = FIXED;
+			printf("Changed Mode to FIXED\n");
+		}
+		switch (CurrentMode) {
 		case FIXED:
 			printf("Fixed SM> \t");
 			CurrentState = SingleStep_TrafficLight_SM( &CurrentState ); // pass address
@@ -35,6 +39,14 @@ void *stateMachineThread()
 			printf("Sensor SM> \t");
 			CurrentState = SensorDrivenLightSequence( &CurrentState ); // pass address
 			counter++;
+			break;
+		case SPECIAL:
+			CurrentState = EWR_NSR_EWTR_NSTG_7;
+			printf("Special state> %d\t", CurrentState);
+			while(switchingMode == 0)
+			{
+
+			}
 			break;
 		default:
 			break;
@@ -48,7 +60,10 @@ int main(int argc, char *argv[])
 {
 	pthread_t stateMachine, keyboarInput;
 
-	printf("Intersection Node started with mode: %d\n", mode);
+	printf("Intersection Node started with mode: %d\n", CurrentMode);
+
+	switchingMode = 0;
+	CurrentMode = SENSOR;
 
 	initTimer();
 	setTimerValues();

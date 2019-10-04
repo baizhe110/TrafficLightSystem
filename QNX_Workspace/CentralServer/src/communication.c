@@ -163,8 +163,9 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 
 	// put your message handling code here and assemble a reply message
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode);
+	replymsg.data = currentMode;
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("current Intersection state '%d' from client (ID:%d), ", msg->data, msg->ClientID);
+	printf("current Intersection state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
 
 	fflush(stdout);
 	sleep(1); // Delay the reply by a second (just for demonstration purposes)

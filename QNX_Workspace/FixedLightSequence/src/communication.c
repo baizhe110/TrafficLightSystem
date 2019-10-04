@@ -94,7 +94,7 @@ void *ex_client(void *sname_data)
 		msg.data=CurrentState;
 
 		// the data we are sending is in msg.data
-		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
+		//printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
 		fflush(stdout);
 
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
@@ -102,24 +102,32 @@ void *ex_client(void *sname_data)
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
 			printf("SendMsg:  couldn't create a timer, errno %d\n", errno);
 			if (errno==3) {
-				printf("trying to reconntect to server");
+				printf("trying to reconnect to server");
 				while((server_coid = name_open(sname, 0)) == -1)
 				{
 					printf("Could not reconnect to server!\n");
 					sleep(1);
 				}
+				// continue with sending next pice of data to server
 				continue;
 			}
 			else
 			{
+				// break if other error than connection lost to server
 				break;
 			}
 			// maybe we did not get a reply from the server
-
 		}
 		else
 		{ // now process the reply
-			printf("   -->Reply is: '%s'\n", reply.buf);
+			//printf("   -->Reply is: '%s'\n", reply.buf);
+			if (CurrentMode != reply.data && switchingMode == 0) {
+				switchingMode = 1;
+				desiredMode = reply.data;
+				printf("Switching to Mode %d\n", desiredMode);
+			}
+
+
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		//sleep(1);	// wait a few seconds before sending the next data packet

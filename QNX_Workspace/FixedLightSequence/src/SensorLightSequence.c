@@ -77,7 +77,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWG_NSR_EWTR_NSTR_4:
 		DoSomething4();
-		while(CurState == EWG_NSR_EWTR_NSTR_4)
+		while(CurState == EWG_NSR_EWTR_NSTR_4 && switchingMode == 0)
 		{
 			pthread_mutex_lock(&mutex);
 			strcpy(NewCarReceive,NewCarGlobal);
@@ -141,7 +141,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
 		DoSomething10();
-		while(CurState == EWR_NSG_EWTR_NSTR_10)
+		while(CurState == EWR_NSG_EWTR_NSTR_10 && switchingMode == 0)
 		{
 			pthread_mutex_lock(&mutex);
 			strcpy(NewCarReceive,NewCarGlobal);

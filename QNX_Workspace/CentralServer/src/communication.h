@@ -26,6 +26,7 @@ typedef struct
 {
 	struct _pulse hdr;  // Our real data comes after this header
 	char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
+	int data;
 } my_reply;
 
 
