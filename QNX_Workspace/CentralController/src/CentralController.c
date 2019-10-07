@@ -109,30 +109,6 @@ void *ex_timerCheckAlive(void * val)
 	pthread_exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char *argv[])
-{
-	printf("Central Controller message passing demo starts now...\n");
-	printf ("--> The pid of this process is %d\n", getpid() );
-
-	char hostnm[100];
-	memset(hostnm, '\0', 100);
-	hostnm[99] = '\n';
-	gethostname(hostnm, sizeof(hostnm));
-
-	printf("--> Machine hostname is: '%s'\n", hostnm);
-	printf("\n");
-	printf("Server running\n");
-	pthread_t  th1, keyboarInput, checkThread;
-	pthread_create(&keyboarInput, NULL, keyboard, NULL);
-	pthread_create (&th1, NULL, server, NULL);
-	pthread_create(&checkThread, NULL, ex_timerCheckAlive, NULL);
-	//int ret = 0;
-	//ret = server();
-	pthread_join(th1,NULL);
-	printf("Main (Server) Terminated....\n");
-	return 0;
-}
-
 
 /*** Server code ***/
 int server()
@@ -260,4 +236,28 @@ int server()
 	// Remove the attach point name from the file system (i.e. /dev/name/local/<myname>)
 	name_detach(attach, 0);
 	pthread_exit(EXIT_SUCCESS);
+}
+
+int main(int argc, char *argv[])
+{
+	printf("Central Controller message passing demo starts now...\n");
+	printf ("--> The pid of this process is %d\n", getpid() );
+
+	char hostnm[100];
+	memset(hostnm, '\0', 100);
+	hostnm[99] = '\n';
+	gethostname(hostnm, sizeof(hostnm));
+
+	printf("--> Machine hostname is: '%s'\n", hostnm);
+	printf("\n");
+	printf("Server running\n");
+	pthread_t  th1, keyboarInput, checkThread;
+	pthread_create(&keyboarInput, NULL, keyboard, NULL);
+	pthread_create (&th1, NULL, server, NULL);
+	pthread_create(&checkThread, NULL, ex_timerCheckAlive, NULL);
+	//int ret = 0;
+	//ret = server();
+	pthread_join(th1,NULL);
+	printf("Main (Server) Terminated....\n");
+	return 0;
 }
