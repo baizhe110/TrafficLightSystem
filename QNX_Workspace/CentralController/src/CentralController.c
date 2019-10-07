@@ -221,7 +221,6 @@ int server()
 			printf("Server received the current Intersection state with value of '%d' from client (ID:%d), ", msg.data, msg.ClientID);
 
 			fflush(stdout);
-			sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
 			printf("\n    -----> replying with: '%s'\n",replymsg.buf);
 			MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));

@@ -84,6 +84,7 @@ typedef union
 timer_t                 timer_id;
 int                     chid;
 my_message_t            msg;
+int                     chid_Timer;
 
 
 // timer variables
@@ -95,39 +96,39 @@ void DoSomething0()
 	printf("In state0: NoTrain_0\n");
 	startOneTimeTimer(timer_id, times.NSR_clear);
 	//timer_settime(timer_id, 0, &itime1, NULL);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 void DoSomething1()
 {
 	printf("In state1: TrainApproaching_1\n");
 	startOneTimeTimer(timer_id, times.EWTG_car);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 void DoSomething2()
 {
 	printf("In state2: TrainApproaching_2\n");
 	startOneTimeTimer(timer_id, times.EWTY_car);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 
 }
 void DoSomething3()
 {
 	printf("In state3: TrainCrossing_3\n");
 	startOneTimeTimer(timer_id, times.EWTR_clear);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 void DoSomething4()
 {
 	printf("In state4: TrainLeaving_4\n");
 	startOneTimeTimer(timer_id, times.EWG_car-times.EWB_ped);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 
 }
 void DoSomething5()
 {
 	printf("In state5: TrainLeaving_5\n");
 	startOneTimeTimer(timer_id, times.EWY_car);
-	MsgReceive(chid, &msg, sizeof(msg), NULL);
+	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 
 
@@ -144,13 +145,13 @@ void startOneTimeTimer(timer_t timerID, double time)
 
 void initTimer()
 {
-	chid = ChannelCreate(0); // Create a communications channel
+	chid_Timer= ChannelCreate(0); // Create a communications channel
 
 	struct sigevent         event;
 	event.sigev_notify = SIGEV_PULSE;
 
 	// create a connection back to ourselves for the timer to send the pulse on
-	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid, _NTO_SIDE_CHANNEL, 0);
+	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid_Timer, _NTO_SIDE_CHANNEL, 0);
 	if (event.sigev_coid == -1)
 	{
 		printf(stderr, "%s:  couldn't ConnectAttach to self!\n", progname);
@@ -262,8 +263,9 @@ void *stateMachineThread()
 	}
 }
 
-void *sendCurrentState(){
+void *sendCurrentState(void *notused){
 
+	printf("Send Current State thread now running\n");
 	char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
 	my_data msg;
 	my_reply reply;
@@ -308,12 +310,13 @@ void *sendCurrentState(){
 			printf("   -->Reply is: '%s'\n", reply.buf);
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
-		//sleep(1);	// wait a few seconds before sending the next data packet
+		sleep(2);	// wait a few seconds before sending the next data packet
 	}
 
 	// Close the connection
 	printf("\n Sending message to server to tell it to close the connection\n");
 	name_close(server_coid);
+
 }
 
 
@@ -321,7 +324,7 @@ void *sendCurrentState(){
 // Intersection Node starting point
 int main(int argc, char *argv[])
 {
-	pthread_t stateMachine, keyboarInput, sendCurrentState;
+	pthread_t stateMachine, keyboarInput, sendCurrentStateThread;
 
 	printf("Boom gate controller started\n");
 
@@ -329,9 +332,9 @@ int main(int argc, char *argv[])
 	initTimer();
 	setTimerValues();
 
+	pthread_create(&sendCurrentStateThread, NULL, sendCurrentState, NULL);
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
-	pthread_create(&sendCurrentState, NULL, sendCurrentState, NULL);
 
 	pthread_join(stateMachine,NULL);
 
