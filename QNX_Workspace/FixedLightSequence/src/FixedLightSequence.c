@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #include "defines.h"
 #include "stateTasks.h"
@@ -40,8 +41,22 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 			switchingMode = 0;
 			CurrentMode = desiredMode;
 			printf("Successfully switched Mode\n");
-			if (CurrentMode == FIXED) {
-				printf("Trying to sync with other nodes");
+			if (syncing) {
+				printf("Trying to sync with other nodes\n");
+				int semValue;
+				sem_getvalue(sem_sync, &semValue);
+				printf("Sem value %d\n",semValue);
+				if (semValue > 0) {
+					printf("start synced\n");
+					sem_wait(sem_sync);
+					while(semValue != 0)
+					{
+						sem_getvalue(sem_sync, &semValue);
+					}
+					printf("Successfully synced\n");
+					sem_close(sem_sync);
+				}
+				syncing = 0;
 				// wait until data from central server signals all nodes ready
 				// if server not availiable continue manually
 				// if takes more than xxx time to manually

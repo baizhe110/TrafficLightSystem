@@ -16,6 +16,7 @@
 #include <sys/netmgr.h>
 #include <sys/neutrino.h>
 #include <errno.h>
+#include <semaphore.h>
 
 char *prognames = "timer_per1.c";
 
@@ -68,6 +69,7 @@ void *ex_client(void *sname_data)
 	my_data msg;
 	my_reply reply;
 	msg.ClientID = 800; // unique number for this client (optional)
+	msg.type = INTERSECTION_TYPE;
 
 	int server_coid;
 	int index = 0;
@@ -125,6 +127,13 @@ void *ex_client(void *sname_data)
 				switchingMode = 1;
 				desiredMode = reply.data;
 				printf("Switching to Mode %d\n", desiredMode);
+				if (desiredMode == FIXED) {
+					if ((sem_sync = sem_open("/net/VM_x86_Target02/dev/sem/sync", NULL)) == SEM_FAILED) {
+						printf("failed to open semaphore %d\n", errno);
+					}
+					printf("Semaphore opened\n");
+					syncing = 1;
+				}
 			}
 
 

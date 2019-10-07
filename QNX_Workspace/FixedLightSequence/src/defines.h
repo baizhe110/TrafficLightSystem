@@ -8,6 +8,10 @@
 #ifndef SRC_DEFINES_H_
 #define SRC_DEFINES_H_
 
+#define INTERSECTION_TYPE 1
+
+#include <semaphore.h>
+
 // enums ********************************************
 enum states {
 	EWR_NSR_EWTR_NSTR_0,
@@ -50,5 +54,8 @@ enum intersection_modes CurrentMode, desiredMode;
 enum sensorInput currentSensor; // clear sensor input after working through it
 
 int switchingMode;
+int syncing;
+sem_t *sem_sync;
+
 
 #endif /* SRC_DEFINES_H_ */

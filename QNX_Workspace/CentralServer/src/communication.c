@@ -10,16 +10,24 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 #include <sys/netmgr.h>
+#include <semaphore.h>
+#include <fcntl.h>
 
 #include "communication.h"
 
 #define maxClients 10
 
 char *prognames = "timer_per1.c";
-int currentMode = 0;
+int currentMode = 1;
 int clientsAlive = 0;
 int clientsDead = 0;
-struct timespec clientLastAlive[maxClients];
+struct timespec clientLastAlive[maxClients], startTime;
+int clientStatus[maxClients], clientType[maxClients];
+
+//for syncing
+sem_t *sem_sync;
+int synced = 0;
+int semOpen = 0;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -60,6 +68,7 @@ void *server()
 	replymsg.hdr.subtype = 0x00;
 
 	living =1;
+	clock_gettime( CLOCK_REALTIME, &startTime);
 	while (living)
 	{
 		// Do your MsgReceive's here now with the chid
@@ -160,14 +169,50 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	if( clock_gettime( CLOCK_REALTIME, &clientLastAlive[msg->ClientID-800]) == -1 ) {
 		printf( "clock gettime error" );
 	}
+	clientType[msg->ClientID-800] = msg->type;
 
 	// put your message handling code here and assemble a reply message
+
+	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
+
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode);
 	replymsg.data = currentMode;
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
 	printf("current Intersection state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
 
 	fflush(stdout);
+
+	if (synced == 0 && currentMode == 0) {
+		printf("start Semaphore sync\n");
+		if (semOpen == 0) {
+			struct timespec now;
+			if( clock_gettime( CLOCK_REALTIME, &now) == -1 ) {
+				printf( "clock gettime error" );
+			}
+			clientsAlive = 0;
+			clientsDead = 0;
+			for (int i = 0; i < maxClients; ++i) {
+				if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
+					if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
+						clientsAlive++;
+						clientStatus[i] = 1;
+					}
+					else
+					{
+						clientsDead++;
+						clientStatus[i] = 0;
+					}
+				}
+			}
+			sem_unlink("/sync");
+			sem_sync = sem_open("/sync", O_CREAT,S_IRWXG, clientsAlive);
+			int value= 10;
+			sem_getvalue(sem_sync, &value);
+			printf("Sync started for %d clients\n", value);
+			semOpen = 1;
+		}
+	}
+
 	sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
 	//printf("\n    -----> replying with: '%s'\n",replymsg.buf);
@@ -232,12 +277,16 @@ void *ex_timerCheckAlive(void * val)
 		clientsAlive = 0;
 		clientsDead = 0;
 		for (int i = 0; i < maxClients; ++i) {
-			if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
-				clientsAlive++;
-			}
-			else
-			{
-				clientsDead++;
+			if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
+				if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
+					clientsAlive++;
+					clientStatus[i] = 1;
+				}
+				else
+				{
+					clientsDead++;
+					clientStatus[i] = 0;
+				}
 			}
 		}
 		printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);

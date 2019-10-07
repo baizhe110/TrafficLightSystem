@@ -20,6 +20,7 @@ typedef struct
 	struct _pulse hdr; // Our real data comes after this header
 	int ClientID; // our data (unique id from client)
 	int data;     // our data
+	int type;
 } my_data;
 
 typedef struct
