@@ -128,7 +128,7 @@ void *ex_client(void *sname_data)
 				desiredMode = reply.data;
 				printf("Switching to Mode %d\n", desiredMode);
 				if (desiredMode == FIXED) {
-					if ((sem_sync = sem_open("/net/VM_x86_Target02/dev/sem/sync", NULL)) == SEM_FAILED) {
+					if ((sem_sync = sem_open(attachPoint, NULL)) == SEM_FAILED) {
 						printf("failed to open semaphore %d\n", errno);
 					}
 					printf("Semaphore opened\n");

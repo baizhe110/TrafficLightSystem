@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
-	char *val = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+	char val[100] = attachPoint;
 	//strcpy(val, QNET_ATTACH_POINT);
 	printf("val: %s \n", val);
 	pthread_t  th3_client;

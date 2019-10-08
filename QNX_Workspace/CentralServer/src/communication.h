@@ -11,7 +11,7 @@
 #include <sys/iofunc.h>
 
 // Define what the channel is called. It will be located at <hostname>/dev/name/local/myname"
-#define ATTACH_POINT "CentralServer"
+#define attachPoint "CentralServer"
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 #define BUF_SIZE 100
 

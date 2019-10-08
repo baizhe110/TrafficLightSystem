@@ -10,6 +10,8 @@
 
 #define INTERSECTION_TYPE 1
 
+#define attachPoint "/net/GerardHost/dev/name/local/CentralServer"
+
 #include <semaphore.h>
 
 // enums ********************************************
@@ -56,6 +58,7 @@ enum sensorInput currentSensor; // clear sensor input after working through it
 int switchingMode;
 int syncing;
 sem_t *sem_sync;
+
 
 
 #endif /* SRC_DEFINES_H_ */

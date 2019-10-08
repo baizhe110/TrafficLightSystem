@@ -31,6 +31,7 @@ int semOpen = 0;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+
 ///////////////////////////////////////// Keyboard input
 void *keyboard(void *notused)
 {
@@ -50,14 +51,14 @@ void *server()
 {
 	name_attach_t *attach;
 	// Create a local name (/dev/name/...)
-	if ((attach = name_attach(NULL, ATTACH_POINT, 0)) == NULL)
+	if ((attach = name_attach(NULL, attachPoint, 0)) == NULL)
 	{
-		printf("\nFailed to name_attach on ATTACH_POINT: %s \n", ATTACH_POINT);
+		printf("\nFailed to name_attach on attachPoint: %s \n", attachPoint);
 		printf("\n Possibly another server with the same name is already running !\n");
 		return EXIT_FAILURE;
 	}
 
-	printf("Server Listening for Clients on ATTACH_POINT: %s \n", ATTACH_POINT);
+	printf("Server Listening for Clients on attachPoint: %s \n", attachPoint);
 
 	my_data msg;
 	int rcvid=0, msgnum=0;  		// no message received yet
