@@ -8,12 +8,8 @@
 
 #include "BoomGateController.h"
 
-#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
-#include <sys/dispatch.h>
 
-#define BUF_SIZE 100
-#define QNET_ATTACH_POINT  "/net/VM_x86_Target02/dev/name/local/CentralServer"  // hostname using full path, change myname to the name used for server
-#define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
+#include <sys/dispatch.h>
 
 
 char *progname = "timer_per1.c";
@@ -23,36 +19,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;  // needs to be set to PTHREA
 char NewTrainGlobal[3]="aaa";
 
 // for timer and message receive
-
-struct Timervalues{
-	double NSG_car;
-	double NSB_ped;
-	double NSTG_car;
-	double NSY_car;
-	double NSTY_car;
-	double NSR_clear;
-	double NSTR_clear;
-
-	double EWG_car;
-	double EWB_ped;
-	double EWTG_car;
-	double EWY_car;
-	double EWTY_car;
-	double EWR_clear;
-	double EWTR_clear;
-};
-typedef struct
-{
-	struct _pulse hdr;  // Our real data comes after this header
-	char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
-} my_reply;
-
-typedef struct
-{
-	struct _pulse hdr; // Our real data comes after this header
-	int ClientID; // our data (unique id from client)
-	int data;     // our data
-} my_data;
 
 
 struct Timervalues times;
@@ -266,7 +232,7 @@ void *stateMachineThread()
 void *sendCurrentState(void *notused){
 
 	printf("Send Current State thread now running\n");
-	char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
 	my_data msg;
 	my_reply reply;
 
@@ -275,14 +241,14 @@ void *sendCurrentState(void *notused){
 	int server_coid;
 	int index = 0;
 
-	printf("  ---> Trying to connect to server named: %s\n", sname);
-	if ((server_coid = name_open(sname, 0)) == -1)
+	printf("  ---> Trying to connect to server named: %s\n", QNET_ATTACH_POINT);
+	if ((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
 	{
 		printf("\n    ERROR, could not connect to server!\n\n");
 		pthread_exit(EXIT_FAILURE);
 	}
 
-	printf("Connection established to: %s\n", sname);
+	printf("Connection established to: %s\n", QNET_ATTACH_POINT);
 
 	// We would have pre-defined data to stuff here
 	msg.hdr.type = 0x00;
@@ -293,7 +259,8 @@ void *sendCurrentState(void *notused){
 	{
 		// set up data packet
 		//msg.data=10+index;
-		msg.data=CurrentState;
+		msg.type =2;
+		msg.state=CurrentState;
 
 		// the data we are sending is in msg.data
 		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);

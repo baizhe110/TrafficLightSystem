@@ -41,6 +41,7 @@ struct itimerspec itime1;
 
 void initTimer();
 void startOneTimeTimer(timer_t timerID, double time);
+void setTimerValues();
 
 void DoSomething0();
 void DoSomething1();

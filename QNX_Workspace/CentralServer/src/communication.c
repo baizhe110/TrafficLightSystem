@@ -22,7 +22,7 @@ int currentMode = 1;
 int clientsAlive = 0;
 int clientsDead = 0;
 struct timespec clientLastAlive[maxClients], startTime;
-int clientStatus[maxClients], clientType[maxClients];
+int clientStatus[maxClients], clientType[maxClients], clientState[maxClient];
 
 //for syncing
 sem_t *sem_sync;
@@ -171,15 +171,16 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		printf( "clock gettime error" );
 	}
 	clientType[msg->ClientID-800] = msg->type;
+	clientState[msg->ClientID-800] = msg->state;
 
 	// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode);
-	replymsg.data = currentMode;
+	replymsg.mode = currentMode;
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("current Intersection state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
+	printf("current node state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
 
 	fflush(stdout);
 

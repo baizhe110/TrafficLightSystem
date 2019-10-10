@@ -21,6 +21,7 @@ typedef struct
 	int ClientID; // our data (unique id from client)
 	int data;     // our data
 	int type;
+	int state;
 } my_data;
 
 typedef struct
@@ -28,6 +29,7 @@ typedef struct
 	struct _pulse hdr;  // Our real data comes after this header
 	char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
 	int data;
+	int mode;
 } my_reply;
 
 

@@ -14,7 +14,7 @@
 // functions **************************************************
 // initialisations
 
-void setTimerValues();
+
 
 void Initialise();
 

@@ -142,3 +142,21 @@ void initTimer()
 		exit (EXIT_FAILURE);
 	}
 }
+void setTimerValues()
+{
+	times.NSG_car 	= 4;
+	times.NSB_ped 	= 1;
+	times.NSTG_car 	= 4;
+	times.NSY_car 	= 2;
+	times.NSTY_car 	= 2;
+	times.NSR_clear	= 1;
+	times.NSTR_clear= 1;
+
+	times.EWG_car	= 4;
+	times.EWB_ped	= 1;
+	times.EWTG_car	= 4;
+	times.EWY_car	= 2;
+	times.EWTY_car	= 2;
+	times.EWR_clear = 1;
+	times.EWTR_clear= 1;
+}
