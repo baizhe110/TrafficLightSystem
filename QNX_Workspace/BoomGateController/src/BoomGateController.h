@@ -11,7 +11,8 @@ enum states BoomGateSequence(void *CurrentState);
 void *keyboard(void *notused);
 
 #define BUF_SIZE 100
-#define QNET_ATTACH_POINT  "/net/GerardHost/dev/name/local/CentralServer"  // hostname using full path, change myname to the name used for server
+//#define QNET_ATTACH_POINT  "/net/GerardHost/dev/name/local/CentralServer"  // hostname using full path, change myname to the name used for server
+#define QNET_ATTACH_POINT "/net/VM_x86_Target02/dev/name/local/CentralServer"
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
@@ -23,6 +24,12 @@ enum states {
 	TrainCrossing_3,
 	TrainLeaving_4,
 	TrainLeaving_5,
+};
+
+enum INTERSECTION_TYPE {
+	Intersection1,
+	Intersection2,
+	BoomGate,
 };
 
 //enum substates {

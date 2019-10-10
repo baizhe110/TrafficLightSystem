@@ -8,9 +8,15 @@
 #ifndef SRC_DEFINES_H_
 #define SRC_DEFINES_H_
 
-#define INTERSECTION_TYPE 1
+enum INTERSECTION_TYPE {
+	Intersection1,
+	Intersection2,
+	BoomGate,
+};
 
-#define attachPoint "/net/GerardHost/dev/name/local/CentralServer"
+#define attachPoint "/net/VM_x86_Target02/dev/name/local/CentralServer"
+//#define attachPoint "/net/GerardHost/dev/name/local/CentralServer"
+#define intersectionType Intersection1
 
 #include <semaphore.h>
 

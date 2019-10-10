@@ -48,6 +48,7 @@ void *stateMachineThread()
 			}
 			break;
 		default:
+			//printf("Unexpected mode %d\n", CurrentMode);
 			break;
 		}
 	}
@@ -62,8 +63,7 @@ int main(int argc, char *argv[])
 	printf("Intersection Node started with mode: %d\n", CurrentMode);
 
 	switchingMode = 0;
-	CurrentMode = SENSOR;
-
+	CurrentMode = FIXED;
 	initTimer();
 	setTimerValues();
 

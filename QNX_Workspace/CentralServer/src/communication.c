@@ -15,14 +15,14 @@
 
 #include "communication.h"
 
-#define maxClients 10
+#define maxClients 3
 
 char *prognames = "timer_per1.c";
-int currentMode = 1;
+int currentMode[maxClients];
 int clientsAlive = 0;
 int clientsDead = 0;
 struct timespec clientLastAlive[maxClients], startTime;
-int clientStatus[maxClients], clientType[maxClients], clientState[maxClient];
+int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
 
 //for syncing
 sem_t *sem_sync;
@@ -35,20 +35,80 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 ///////////////////////////////////////// Keyboard input
 void *keyboard(void *notused)
 {
-	char newMode[3];
+	char newInput[100], currentText[100];
+	int desiredMode, type, nodeNumber, dataType;
+	int count = 0, i=0 , wordNumber = 0;
 	while(1)
 	{
-		scanf(" %s",&newMode);
-		pthread_mutex_lock(&mutex);
-		currentMode = newMode[0]-'0';
-		pthread_mutex_unlock(&mutex);
-		printf("Mode changed to '%d'\n", currentMode);
+		scanf(" %s",&newInput);
+		count=0;
+		type = -1;
+		wordNumber = 0;
+		while(newInput[count] != '\0')
+		{
+			i=0;
+			while(newInput[count] != ';' && newInput[count] != '\0')
+			{
+				currentText[i] = newInput[count];
+				i++;
+				count++;
+			}
+			currentText[i] = '\0';
+			count++;
+			wordNumber++;
+			switch (wordNumber) {
+			case 1:
+				if(strcmp("intersection1",currentText) == 0)
+				{
+					type = Intersection1;
+				}
+				else if(strcmp("intersection2",currentText) == 0)
+				{
+					type = Intersection2;
+				}
+				else if(strcmp("boom",currentText) == 0)
+				{
+					type = BoomGate;
+				}
+				else if(strcmp("special",currentText) == 0)
+				{
+					type = SPECIAL;
+				}
+				break;
+			case 2:
+				dataType= atoi(currentText);
+				break;
+			case 3:
+				if (dataType == 1) {
+					pthread_mutex_lock(&mutex);
+					currentMode[type] = atoi(currentText);
+					pthread_mutex_unlock(&mutex);
+					printf("Mode of Type %d changed to '%d'\n",type, currentMode[type]);
+				}
+				else if(dataType == 2)
+				{
+					//get timing for intersection
+				}
+				else if(dataType == 3)
+				{
+
+				}
+
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }
 
 /////////////////////////////////////////// Server code
 void *server()
 {
+	// setting node modes to default
+	for (int i = 0; i < maxClients; ++i) {
+		currentMode[i] = 0;
+	}
 	name_attach_t *attach;
 	// Create a local name (/dev/name/...)
 	if ((attach = name_attach(NULL, attachPoint, 0)) == NULL)
@@ -167,24 +227,25 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	replymsg.hdr.type = 0x01;
 	replymsg.hdr.subtype = 0x00;
 
-	if( clock_gettime( CLOCK_REALTIME, &clientLastAlive[msg->ClientID-800]) == -1 ) {
+	if( clock_gettime( CLOCK_REALTIME, &clientLastAlive[msg->type]) == -1 ) {
 		printf( "clock gettime error" );
 	}
-	clientType[msg->ClientID-800] = msg->type;
-	clientState[msg->ClientID-800] = msg->state;
+	//clientType[msg->ClientID] = msg->type;
+	clientState[msg->type] = msg->state;
 
 	// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
-	sprintf(replymsg.buf, "Current Mode: %d", currentMode);
-	replymsg.mode = currentMode;
+	sprintf(replymsg.buf, "Current Mode: %d", currentMode[msg->type]);
+
+	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
 	printf("current node state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
 
 	fflush(stdout);
 
-	if (synced == 0 && currentMode == 0) {
+	if (synced == 0 && currentMode[msg->type] == 0) {
 		printf("start Semaphore sync\n");
 		if (semOpen == 0) {
 			struct timespec now;
@@ -217,7 +278,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 
 	sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
-	//printf("\n    -----> replying with: '%s'\n",replymsg.buf);
+	//printf("\n    -----> replying with: mode: '%d'\n",replymsg.mode);
 	MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
 
 	return 0;

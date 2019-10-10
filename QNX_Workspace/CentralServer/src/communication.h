@@ -38,5 +38,16 @@ void *server();
 void *handleServerMessages(void *rcvid_passed, void *msg_passed);
 void *ex_timerCheckAlive(void * val);
 
+enum intersection_modes {
+	FIXED,
+	SENSOR,
+	SPECIAL
+};
+
+enum INTERSECTION_TYPE {
+	Intersection1,
+	Intersection2,
+	BoomGate,
+};
 
 #endif /* SRC_COMMUNICATION_H_ */

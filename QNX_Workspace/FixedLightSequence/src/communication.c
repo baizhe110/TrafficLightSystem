@@ -69,7 +69,7 @@ void *ex_client(void *sname_data)
 	my_data msg;
 	my_reply reply;
 	msg.ClientID = 800; // unique number for this client (optional)
-	msg.type = INTERSECTION_TYPE;
+	msg.type = intersectionType;
 
 	int server_coid;
 	int index = 0;
@@ -102,8 +102,8 @@ void *ex_client(void *sname_data)
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
 		{
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
-			printf("SendMsg:  couldn't create a timer, errno %d\n", errno);
-			if (errno==3) {
+			printf("SendMsg: errno %d\n", errno);
+			if (errno!=0) {
 				printf("trying to reconnect to server");
 				while((server_coid = name_open(sname, 0)) == -1)
 				{
@@ -123,20 +123,22 @@ void *ex_client(void *sname_data)
 		else
 		{ // now process the reply
 			//printf("   -->Reply is: '%s'\n", reply.buf);
-			if (CurrentMode != reply.data && switchingMode == 0) {
+			if (CurrentMode != reply.mode && switchingMode == 0) {
 				switchingMode = 1;
-				desiredMode = reply.data;
+				desiredMode = reply.mode;
 				printf("Switching to Mode %d\n", desiredMode);
 				if (desiredMode == FIXED) {
 					if ((sem_sync = sem_open(attachPoint, NULL)) == SEM_FAILED) {
 						printf("failed to open semaphore %d\n", errno);
 					}
-					printf("Semaphore opened\n");
-					syncing = 1;
+					else
+					{
+						printf("Semaphore opened\n");
+						syncing = 1;
+					}
+
 				}
 			}
-
-
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		//sleep(1);	// wait a few seconds before sending the next data packet

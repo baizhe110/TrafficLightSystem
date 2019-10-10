@@ -165,19 +165,19 @@ enum states BoomGateSequence(void *CurrentState)
 	case NoTrain_0:
 		DoSomething0();
 		while(CurState == NoTrain_0){
-		pthread_mutex_lock(&mutex);
-		strcpy(NewTrainReceive,NewTrainGlobal);
-		strcpy(NewTrainGlobal,"aaa");
-		pthread_mutex_unlock(&mutex);
-		if(strcmp("T",NewTrainReceive) == 0)
-		{
-			printf("Train approaching\n");
-			CurState = TrainApproaching_1;
-		}
-		else
-		{
-			CurState = NoTrain_0;
-		}
+			pthread_mutex_lock(&mutex);
+			strcpy(NewTrainReceive,NewTrainGlobal);
+			strcpy(NewTrainGlobal,"aaa");
+			pthread_mutex_unlock(&mutex);
+			if(strcmp("T",NewTrainReceive) == 0)
+			{
+				printf("Train approaching\n");
+				CurState = TrainApproaching_1;
+			}
+			else
+			{
+				CurState = NoTrain_0;
+			}
 		}
 
 		break;
@@ -222,7 +222,7 @@ void *stateMachineThread()
 			counter++;
 			break;
 		case SPECIAL:
-		break;
+			break;
 		default:
 			break;
 		}
@@ -236,16 +236,17 @@ void *sendCurrentState(void *notused){
 	my_data msg;
 	my_reply reply;
 
-	msg.ClientID = 800; // unique number for this client (optional)
+	msg.ClientID = 700; // unique number for this client (optional)
+	msg.type = BoomGate;
 
 	int server_coid;
 	int index = 0;
 
 	printf("  ---> Trying to connect to server named: %s\n", QNET_ATTACH_POINT);
-	if ((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
+	while((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
 	{
-		printf("\n    ERROR, could not connect to server!\n\n");
-		pthread_exit(EXIT_FAILURE);
+		//printf("Could not connect to server!\n");
+		sleep(1);
 	}
 
 	printf("Connection established to: %s\n", QNET_ATTACH_POINT);
@@ -259,16 +260,30 @@ void *sendCurrentState(void *notused){
 	{
 		// set up data packet
 		//msg.data=10+index;
-		msg.type =2;
 		msg.state=CurrentState;
 
 		// the data we are sending is in msg.data
-		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
+		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.state);
 		fflush(stdout);
 
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
 		{
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
+			if (errno==3) {
+				printf("trying to reconnect to server");
+				while((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
+				{
+					printf("Could not reconnect to server!\n");
+					sleep(1);
+				}
+				// continue with sending next pice of data to server
+				continue;
+			}
+			else
+			{
+				// break if other error than connection lost to server
+				break;
+			}
 			// maybe we did not get a reply from the server
 			break;
 		}
@@ -306,3 +321,4 @@ int main(int argc, char *argv[])
 	pthread_join(stateMachine,NULL);
 
 }
+
