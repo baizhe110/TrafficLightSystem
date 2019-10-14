@@ -12,6 +12,8 @@
 #include <sys/netmgr.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <sys/neutrino.h>>
+#include <stdint.h>
 
 #include "communication.h"
 
@@ -21,6 +23,7 @@ char *prognames = "timer_per1.c";
 int currentMode[maxClients];
 int clientsAlive = 0;
 int clientsDead = 0;
+int disattachPoint = 0; //for disattach message channel when shutdown central servewr
 struct timespec clientLastAlive[maxClients], startTime;
 int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
 
@@ -77,6 +80,13 @@ void *keyboard(void *notused)
 				{
 					type = SPECIAL;
 				}
+				else if(strcmp("stop",currentText) == 0)
+				{
+					pthread_mutex_lock(&mutex);
+					disattachPoint = 1;
+					pthread_mutex_unlock(&mutex);
+					printf("Stop command received, stopping all services...\n");
+				}
 				break;
 			case 2:
 				dataType= atoi(currentText);
@@ -119,6 +129,10 @@ void *keyboard(void *notused)
 /////////////////////////////////////////// Server code
 void *server()
 {
+	struct sigevent         timeOutEvent;
+	timeOutEvent.sigev_notify = SIGEV_UNBLOCK;
+
+	uint64_t timeout = 10000000000;		//for timeout service, 10s
 	// setting node modes to default
 	for (int i = 0; i < maxClients; ++i) {
 		currentMode[i] = 0;
@@ -146,7 +160,15 @@ void *server()
 	clock_gettime( CLOCK_REALTIME, &startTime);
 	while (living)
 	{
-		// Do your MsgReceive's here now with the chid
+		if (disattachPoint == 1) 		//if receive stop command, stop the while loop.
+				{
+					pthread_mutex_lock(&mutex);
+					living = 0;
+					pthread_mutex_unlock(&mutex);
+
+				}
+		TimerTimeout( CLOCK_REALTIME, _NTO_TIMEOUT_RECEIVE,&timeOutEvent, &timeout, NULL ); //if no msg received after 10s, unblock the receive state
+
 		rcvid = MsgReceive(attach->chid, &msg, sizeof(msg), NULL);
 
 		if (rcvid == -1)  // Error condition, exit
@@ -203,7 +225,16 @@ void *server()
 		// for messages:
 		if(rcvid > 0) // if true then A message was received
 		{
+
 			msgnum++;
+			if (disattachPoint == 1) 		//if receive stop command, stop the server phtread.
+			{
+				pthread_mutex_lock(&mutex);
+				living = 0;
+				pthread_mutex_unlock(&mutex);
+//				name_detach(attach, 0);
+//				printf("Communication channel detached.");
+			}
 			// If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
 			if (msg.hdr.type == _IO_CONNECT )
 			{
@@ -228,6 +259,7 @@ void *server()
 	}
 	// Remove the attach point name from the file system (i.e. /dev/name/local/<myname>)
 	name_detach(attach, 0);
+	printf("Communication service has stopped\n.");
 	pthread_exit(EXIT_SUCCESS);
 }
 
@@ -366,7 +398,7 @@ void *ex_timerCheckAlive(void * val)
 
 	struct timespec now;
 	// while checking loop
-	while(1)
+	while(!disattachPoint) //using disattachPoint signal as flag
 	{
 		// wait for message/pulse
 		MsgReceive(chid, NULL, NULL, NULL);
@@ -391,6 +423,7 @@ void *ex_timerCheckAlive(void * val)
 		}
 		printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);
 	}
+	printf("Thread alive checking service has stopped.\n");
 	pthread_exit(EXIT_SUCCESS);
 }
 
