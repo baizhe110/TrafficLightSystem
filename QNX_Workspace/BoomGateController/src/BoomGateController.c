@@ -51,7 +51,7 @@ timer_t                 timer_id;
 int                     chid;
 my_message_t            msg;
 int                     chid_Timer;
-
+int TrainApproachint = 0;
 
 // timer variables
 struct itimerspec itime1;
@@ -173,6 +173,9 @@ enum states BoomGateSequence(void *CurrentState)
 			{
 				printf("Train approaching\n");
 				CurState = TrainApproaching_1;
+				pthread_mutex_lock(&mutex);
+				TrainApproachint = 1;
+				pthread_mutex_unlock(&mutex);
 			}
 			else
 			{
@@ -200,6 +203,9 @@ enum states BoomGateSequence(void *CurrentState)
 	case TrainLeaving_5:
 		DoSomething5();
 		CurState = NoTrain_0;
+		pthread_mutex_lock(&mutex);
+		TrainApproachint = 0;
+		pthread_mutex_unlock(&mutex);
 		break;
 	}
 	return CurState;
@@ -260,6 +266,9 @@ void *sendCurrentState(void *notused){
 		// set up data packet
 		//msg.data=10+index;
 		msg.state=CurrentState;
+		pthread_mutex_lock(&mutex);
+		msg.TrainApproach = TrainApproachint;
+		pthread_mutex_unlock(&mutex);
 
 		// the data we are sending is in msg.data
 		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.state);

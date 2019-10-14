@@ -26,6 +26,7 @@ int clientsDead = 0;
 int disattachPoint = 0; //for disattach message channel when shutdown central servewr
 struct timespec clientLastAlive[maxClients], startTime;
 int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
+int TrainApproachint = 0;
 
 //for syncing
 sem_t *sem_sync;
@@ -279,12 +280,18 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	//clientType[msg->ClientID] = msg->type;
 	clientState[msg->type] = msg->state;
 	clientType[msg->type] = msg->type;
-	// put your message handling code here and assemble a reply message
+	TrainApproachint = msg->TrainApproach;
+	if(TrainApproachint==1)
+	{
+	printf("Train approaching\n",TrainApproachint);
+	}
+			// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode[msg->type]);
 	replymsg.data = 0;
+	replymsg.TrainApproach = TrainApproachint;
 	// send timer values data
 	if(replyDataType == 2)
 	{

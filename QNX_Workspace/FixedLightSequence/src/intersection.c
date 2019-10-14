@@ -26,6 +26,10 @@ void *stateMachineThread()
 
 	while (1)
 	{
+		if(TrainApproachint==1)
+		{
+		printf("State machine nows that train approaching\n");
+		}
 		if (switchingMode == 1) {
 			CurrentMode = FIXED;
 			printf("Changing mode...\t");
@@ -34,6 +38,10 @@ void *stateMachineThread()
 		case FIXED:
 			printf("Fixed SM> \t");
 			CurrentState = SingleStep_TrafficLight_SM( &CurrentState ); // pass address
+			while(TrainApproachint==1)
+			{
+				CurrentState = EWR_NSG_EWTR_NSTR_10;
+			}
 			break;
 		case SENSOR:
 			printf("Sensor SM> \t");

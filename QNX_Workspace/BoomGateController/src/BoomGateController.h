@@ -44,6 +44,7 @@ typedef struct
 	int data;     // our data
 	int type;
 	int state;
+	int TrainApproach;
 } my_data;
 typedef struct
 {

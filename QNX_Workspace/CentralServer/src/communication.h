@@ -22,6 +22,7 @@ typedef struct
 	int data;     // our data
 	int type;
 	int state;
+	int TrainApproach;
 } my_data;
 
 typedef struct
@@ -30,6 +31,7 @@ typedef struct
 	char buf[BUF_SIZE]; // Message we send back to clients to tell them the messages was processed correctly.
 	int data;
 	int mode;
+	int TrainApproach;
 } my_reply;
 
 

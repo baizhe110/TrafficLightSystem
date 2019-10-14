@@ -21,6 +21,8 @@
 
 char *prognames = "timer_per1.c";
 
+TrainApproachint = 0;
+
 // Sends current state to central controller every xxx seconds
 void *ex_client(void *sname_data)
 {
@@ -94,7 +96,7 @@ void *ex_client(void *sname_data)
 	{
 		// set up data packet
 		//msg.data=10+index;
-		msg.data=CurrentState;
+		msg.state=CurrentState;
 
 		// the data we are sending is in msg.data
 		//printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
@@ -191,6 +193,12 @@ void *ex_client(void *sname_data)
 					}
 				}
 			}
+		}
+
+		TrainApproachint = reply.TrainApproach;
+		if(TrainApproachint==1)
+		{
+		printf("Train approaching, change to NSG\n");
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		//sleep(1);	// wait a few seconds before sending the next data packet
