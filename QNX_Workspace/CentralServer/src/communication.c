@@ -174,7 +174,7 @@ void *server()
 		if (rcvid == -1)  // Error condition, exit
 		{
 			printf("\nFailed to MsgReceive\n");
-			break;
+			continue;
 		}
 
 		// did we receive a Pulse or message?
