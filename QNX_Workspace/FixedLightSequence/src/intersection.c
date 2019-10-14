@@ -21,10 +21,10 @@
 
 void *stateMachineThread()
 {
-	int Runtimes=300, counter = 0;
+
 	// means we will need to pass it by address
 
-	while (counter < Runtimes)
+	while (1)
 	{
 		if (switchingMode == 1) {
 			CurrentMode = FIXED;
@@ -34,12 +34,10 @@ void *stateMachineThread()
 		case FIXED:
 			printf("Fixed SM> \t");
 			CurrentState = SingleStep_TrafficLight_SM( &CurrentState ); // pass address
-			counter++;
 			break;
 		case SENSOR:
 			printf("Sensor SM> \t");
 			CurrentState = SensorDrivenLightSequence( &CurrentState ); // pass address
-			counter++;
 			break;
 		case SPECIAL:
 			CurrentState = EWR_NSR_EWTR_NSTG_7;

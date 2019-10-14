@@ -210,18 +210,17 @@ enum states CurrentState=0; // Declaring the enum within the main
 
 void *stateMachineThread()
 {
-	int Runtimes=30, counter = 0;
 	// means we will need to pass it by address
 
-	while (counter < Runtimes)
+	while (1)
 	{
 		switch (mode) {
 		case NORMAL:
 			printf("Normal Sequence> \t");
 			CurrentState = BoomGateSequence( &CurrentState ); // pass address
-			counter++;
 			break;
 		case SPECIAL:
+			CurrentState = TrainCrossing_3; // Example for setting manually special state.
 			break;
 		default:
 			break;
@@ -290,6 +289,7 @@ void *sendCurrentState(void *notused){
 		else
 		{ // now process the reply
 			printf("   -->Reply is: '%s'\n", reply.buf);
+			mode = reply.mode;
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		sleep(2);	// wait a few seconds before sending the next data packet

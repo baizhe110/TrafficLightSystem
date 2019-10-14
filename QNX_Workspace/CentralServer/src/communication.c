@@ -246,7 +246,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	}
 	//clientType[msg->ClientID] = msg->type;
 	clientState[msg->type] = msg->state;
-
+	clientType[msg->type] = msg->type;
 	// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
@@ -262,7 +262,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	}
 	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("current node state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
+	printf("current node state '%d' from client (ID:%d)\n", msg->state, msg->ClientID);
 
 	fflush(stdout);
 

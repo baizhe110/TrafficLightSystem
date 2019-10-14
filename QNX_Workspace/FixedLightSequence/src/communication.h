@@ -20,7 +20,9 @@ typedef struct
 	int ClientID; // our data (unique id from client)
 	int data;     // our data
 	int type;
+	int state;
 } my_data;
+
 
 typedef struct
 {
