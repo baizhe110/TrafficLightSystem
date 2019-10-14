@@ -15,6 +15,8 @@
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 #define BUF_SIZE 100
 
+
+
 typedef struct
 {
 	struct _pulse hdr; // Our real data comes after this header

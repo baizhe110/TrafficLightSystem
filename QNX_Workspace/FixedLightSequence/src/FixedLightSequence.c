@@ -37,7 +37,7 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 						sem_getvalue(sem_sync, &semValue);
 					}
 					printf("Successfully synced\n");
-					sem_close(sem_sync);
+					//sem_close(sem_sync);
 				}
 				syncing = 0;
 				// wait until data from central server signals all nodes ready

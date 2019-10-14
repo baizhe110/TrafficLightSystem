@@ -12,6 +12,8 @@
 #include <sys/netmgr.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <sys/neutrino.h>>
+#include <stdint.h>
 
 #include "communication.h"
 
@@ -21,6 +23,7 @@ char *prognames = "timer_per1.c";
 int currentMode[maxClients];
 int clientsAlive = 0;
 int clientsDead = 0;
+int disattachPoint = 0; //for disattach message channel when shutdown central servewr
 struct timespec clientLastAlive[maxClients], startTime;
 int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
 
@@ -74,6 +77,13 @@ void *keyboard(void *notused)
 				{
 					type = SPECIAL;
 				}
+				else if(strcmp("stop",currentText) == 0)
+				{
+					pthread_mutex_lock(&mutex);
+					disattachPoint = 1;
+					pthread_mutex_unlock(&mutex);
+					printf("Stop command received, stopping all services...\n");
+				}
 				break;
 			case 2:
 				dataType= atoi(currentText);
@@ -105,6 +115,10 @@ void *keyboard(void *notused)
 /////////////////////////////////////////// Server code
 void *server()
 {
+	//struct sigevent         event;
+	//event.sigev_notify = SIGEV_UNBLOCK;
+
+	uint64_t timeout = 10000000000;	//for timeout service, 10s
 	// setting node modes to default
 	for (int i = 0; i < maxClients; ++i) {
 		currentMode[i] = 0;
@@ -132,7 +146,16 @@ void *server()
 	clock_gettime( CLOCK_REALTIME, &startTime);
 	while (living)
 	{
-		// Do your MsgReceive's here now with the chid
+
+		if (disattachPoint == 1) 		//if receive stop command, stop the server phtread.
+		{
+			pthread_mutex_lock(&mutex);
+			living = 0;
+			pthread_mutex_unlock(&mutex);
+
+		}
+		TimerTimeout( CLOCK_REALTIME, _NTO_TIMEOUT_RECEIVE,NULL, &timeout, NULL );
+
 		rcvid = MsgReceive(attach->chid, &msg, sizeof(msg), NULL);
 
 		if (rcvid == -1)  // Error condition, exit
@@ -150,6 +173,8 @@ void *server()
 			case _PULSE_CODE_DISCONNECT:
 				// A client disconnected all its connections by running
 				// name_close() for each name_open()  or terminated
+
+
 				if( Stay_alive == 0)
 				{
 					ConnectDetach(msg.hdr.scoid);
@@ -161,6 +186,7 @@ void *server()
 				{
 					printf("\nServer received Detach pulse from ClientID:%d but rejected it ...\n", msg.ClientID);
 				}
+
 				break;
 
 			case _PULSE_CODE_UNBLOCK:
@@ -190,6 +216,14 @@ void *server()
 		if(rcvid > 0) // if true then A message was received
 		{
 			msgnum++;
+			if (disattachPoint == 1) 		//if receive stop command, stop the server phtread.
+			{
+				pthread_mutex_lock(&mutex);
+				living = 0;
+				pthread_mutex_unlock(&mutex);
+//				name_detach(attach, 0);
+//				printf("Communication channel detached.");
+			}
 			// If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
 			if (msg.hdr.type == _IO_CONNECT )
 			{
@@ -214,6 +248,7 @@ void *server()
 	}
 	// Remove the attach point name from the file system (i.e. /dev/name/local/<myname>)
 	name_detach(attach, 0);
+	printf("Communication service has stopped\n.");
 	pthread_exit(EXIT_SUCCESS);
 }
 
@@ -255,18 +290,26 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 			clientsAlive = 0;
 			clientsDead = 0;
 			for (int i = 0; i < maxClients; ++i) {
-				if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
-					if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
-						clientsAlive++;
-						clientStatus[i] = 1;
-					}
-					else
-					{
-						clientsDead++;
-						clientStatus[i] = 0;
+			/*	if(disattachPoint=1)
+				{
+					sem_unlink("/sync");
+					synced = 1;
+					printf("Node sync service has stopped.\n");
+			*/
+
+					if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
+						if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
+							clientsAlive++;
+							clientStatus[i] = 1;
+						}
+						else
+						{
+							clientsDead++;
+							clientStatus[i] = 0;
+						}
 					}
 				}
-			}
+		//	}
 			sem_unlink("/sync");
 			sem_sync = sem_open("/sync", O_CREAT,S_IRWXG, clientsAlive);
 			int value= 10;
@@ -292,6 +335,7 @@ void *ex_timerCheckAlive(void * val)
 	timer_t                 periodicTimer_id;
 	int                     chid;
 	chid = ChannelCreate(0); // Create a communications channel
+//	int 					timerLiving = 1;
 
 	//struct sigevent         event;
 	event.sigev_notify = SIGEV_PULSE;
@@ -329,7 +373,7 @@ void *ex_timerCheckAlive(void * val)
 
 	struct timespec now;
 	// while checking loop
-	while(1)
+	while(!disattachPoint) //using disattachPoint signal as flag
 	{
 		// wait for message/pulse
 		MsgReceive(chid, NULL, NULL, NULL);
@@ -354,6 +398,7 @@ void *ex_timerCheckAlive(void * val)
 		}
 		printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);
 	}
+	printf("Thread alive checking service has stopped.\n");
 	pthread_exit(EXIT_SUCCESS);
 }
 
