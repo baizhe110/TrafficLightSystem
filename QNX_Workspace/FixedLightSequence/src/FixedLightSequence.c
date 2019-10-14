@@ -21,22 +21,22 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		DoSomething0();
 		CurState = EWR_NSR_EWTG_NSTR_1;
 		if (switchingMode == 1) {
-			switchingMode = 0;
 			CurrentMode = desiredMode;
-			printf("Successfully switched Mode\n");
-			if (syncing) {
-				printf("Trying to sync with other nodes\n");
+			if(syncing)
+			{
+				//printf("Trying to sync with other nodes\n");
 				int semValue;
 				sem_getvalue(sem_sync, &semValue);
-				printf("Sem value %d\n",semValue);
+				printf("Clients to sync with: %d\n",semValue);
 				if (semValue > 0) {
-					printf("start synced\n");
+					//printf("start synced\n");
 					sem_wait(sem_sync);
 					while(semValue != 0)
 					{
 						sem_getvalue(sem_sync, &semValue);
 					}
-					printf("Successfully synced\n");
+					printf("Successfully synced with all clients\n");
+					//CurrentMode = FIXED;
 					sem_close(sem_sync);
 				}
 				syncing = 0;
@@ -44,6 +44,8 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 				// if server not availiable continue manually
 				// if takes more than xxx time to manually
 			}
+			switchingMode = 0;
+			printf("Mode switched\n");
 		}
 		break;
 	case EWR_NSR_EWTG_NSTR_1:

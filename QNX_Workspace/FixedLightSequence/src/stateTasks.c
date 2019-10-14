@@ -142,21 +142,25 @@ void initTimer()
 		exit (EXIT_FAILURE);
 	}
 }
-void setTimerValues()
+void setTimerValues(struct Timervalues t)
 {
-	times.NSG_car 	= 4;
-	times.NSB_ped 	= 1;
-	times.NSTG_car 	= 4;
-	times.NSY_car 	= 2;
-	times.NSTY_car 	= 2;
-	times.NSR_clear	= 1;
-	times.NSTR_clear= 1;
+	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
+			times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
+	times.NSG_car 	= t.NSG_car;
+	times.NSB_ped 	= t.NSB_ped;
+	times.NSTG_car 	= t.NSTG_car;
+	times.NSY_car 	= t.NSY_car;
+	times.NSTY_car 	= t.NSTY_car;
+	times.NSR_clear	= t.NSR_clear;
+	times.NSTR_clear= t.NSTR_clear;
 
-	times.EWG_car	= 4;
-	times.EWB_ped	= 1;
-	times.EWTG_car	= 4;
-	times.EWY_car	= 2;
-	times.EWTY_car	= 2;
-	times.EWR_clear = 1;
-	times.EWTR_clear= 1;
+	times.EWG_car	= t.EWG_car;
+	times.EWB_ped	= t.EWB_ped;
+	times.EWTG_car	= t.EWTG_car;
+	times.EWY_car	= t.EWY_car;
+	times.EWTY_car	= t.EWTY_car;
+	times.EWR_clear = t.EWR_clear;
+	times.EWTR_clear= t.EWTR_clear;
+	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
+				times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
 }

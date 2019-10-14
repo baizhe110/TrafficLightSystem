@@ -14,7 +14,9 @@ enum INTERSECTION_TYPE {
 	BoomGate,
 };
 
-#define attachPoint "/net/VM_x86_Target02/dev/name/local/CentralServer"
+//#define attachPoint "/net/VM_x86_Target02/dev/name/local/CentralServer"
+#define attachPoint "/net/EA42e8b8/dev/name/local/CentralServer"
+#define attachPointSem "/net/EA42e8b8/dev/sem/sync"
 //#define attachPoint "/net/GerardHost/dev/name/local/CentralServer"
 #define intersectionType Intersection1
 
@@ -53,6 +55,7 @@ enum substates {
 enum intersection_modes {
 	FIXED,
 	SENSOR,
+	FIXED_SYNCED,
 	SPECIAL
 };
 

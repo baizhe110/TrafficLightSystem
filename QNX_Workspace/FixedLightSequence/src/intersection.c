@@ -9,6 +9,7 @@
 #include "defines.h"
 #include "FixedLightSequence.h"
 #include "SensorLightSequence.h"
+#include "stateTasks.h"
 #include "communication.h"
 #include <sys/dispatch.h>
 #include <fcntl.h>
@@ -20,14 +21,14 @@
 
 void *stateMachineThread()
 {
-	int Runtimes=30, counter = 0;
+	int Runtimes=300, counter = 0;
 	// means we will need to pass it by address
 
 	while (counter < Runtimes)
 	{
 		if (switchingMode == 1) {
 			CurrentMode = FIXED;
-			printf("Changing mode...\n");
+			printf("Changing mode...\t");
 		}
 		switch (CurrentMode) {
 		case FIXED:
@@ -65,7 +66,24 @@ int main(int argc, char *argv[])
 	switchingMode = 0;
 	CurrentMode = FIXED;
 	initTimer();
-	setTimerValues();
+
+	struct Timervalues t;
+	t.NSG_car 	= 4;
+	t.NSB_ped 	= 1;
+	t.NSTG_car 	= 4;
+	t.NSY_car 	= 2;
+	t.NSTY_car 	= 2;
+	t.NSR_clear	= 1;
+	t.NSTR_clear= 1;
+
+	t.EWG_car	= 4;
+	t.EWB_ped	= 1;
+	t.EWTG_car	= 4;
+	t.EWY_car	= 2;
+	t.EWTY_car	= 2;
+	t.EWR_clear = 1;
+	t.EWTR_clear= 1;
+	setTimerValues(t);
 
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);

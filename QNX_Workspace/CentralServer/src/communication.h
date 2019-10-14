@@ -41,6 +41,7 @@ void *ex_timerCheckAlive(void * val);
 enum intersection_modes {
 	FIXED,
 	SENSOR,
+	FIXED_SYNCED,
 	SPECIAL
 };
 

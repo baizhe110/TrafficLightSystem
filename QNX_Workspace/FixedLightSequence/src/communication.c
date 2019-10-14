@@ -11,6 +11,7 @@
 #include <share.h>
 #include <pthread.h>
 #include "communication.h"
+#include "stateTasks.h"
 #include "defines.h"
 #include <time.h>
 #include <sys/netmgr.h>
@@ -123,20 +124,71 @@ void *ex_client(void *sname_data)
 		else
 		{ // now process the reply
 			//printf("   -->Reply is: '%s'\n", reply.buf);
-			if (CurrentMode != reply.mode && switchingMode == 0) {
-				switchingMode = 1;
-				desiredMode = reply.mode;
-				printf("Switching to Mode %d\n", desiredMode);
-				if (desiredMode == FIXED) {
-					if ((sem_sync = sem_open(attachPoint, NULL)) == SEM_FAILED) {
-						printf("failed to open semaphore %d\n", errno);
-					}
-					else
-					{
-						printf("Semaphore opened\n");
-						syncing = 1;
-					}
 
+			// check if data is for updating timing values
+			//printf("reply data type: %d\n", reply.data);
+			if (reply.data == 2) {
+				char currentText[100];
+				double timingValues[14];
+				int desiredMode, type, nodeNumber, dataType;
+				int count = 0, i=0 , wordNumber = 0;
+				while(reply.buf[count] != '\0')
+				{
+					i=0;
+					while(reply.buf[count] != ',' && reply.buf[count] != '\0')
+					{
+						currentText[i] = reply.buf[count];
+						i++;
+						count++;
+					}
+					currentText[i] = '\0';
+					timingValues[wordNumber] = atof(currentText);
+					count++;
+					printf("%lf,",timingValues[wordNumber]);
+					wordNumber++;
+
+				}
+				printf("\n word number %d\n", wordNumber-1);
+				struct Timervalues t;
+				t.NSG_car 	= timingValues[0];
+				t.NSB_ped 	= timingValues[1];
+				t.NSTG_car 	= timingValues[2];
+				t.NSY_car 	= timingValues[3];
+				t.NSTY_car 	= timingValues[4];
+				t.NSR_clear	= timingValues[5];
+				t.NSTR_clear= timingValues[6];
+
+				t.EWG_car	= timingValues[7];
+				t.EWB_ped	= timingValues[8];
+				t.EWTG_car	= timingValues[9];
+				t.EWY_car	= timingValues[10];
+				t.EWTY_car	= timingValues[11];
+				t.EWR_clear = timingValues[12];
+				t.EWTR_clear= timingValues[13];
+				setTimerValues(t);
+				printf("timingValues updated\n");
+			}
+			// check mode for updating. If it is synced fixed light seq then open sem for sync
+			if (CurrentMode != reply.mode && switchingMode == 0) {
+				if (CurrentMode == FIXED_SYNCED && reply.mode == FIXED)
+				{
+					CurrentMode = reply.mode;
+				} else
+				{
+					switchingMode = 1;
+					desiredMode = reply.mode;
+					printf("Switching to Mode %d\n", desiredMode);
+					if (desiredMode == FIXED_SYNCED) {
+						if ((sem_sync = sem_open(attachPointSem, NULL)) == SEM_FAILED) {
+							printf("failed to open semaphore %d\n", errno);
+						}
+						else
+						{
+							printf("Semaphore opened\n");
+							syncing = 1;
+						}
+
+					}
 				}
 			}
 		}

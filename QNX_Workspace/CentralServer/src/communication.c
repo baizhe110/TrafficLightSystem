@@ -28,6 +28,9 @@ int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
 sem_t *sem_sync;
 int synced = 0;
 int semOpen = 0;
+//for sending data in reply
+int replyDataType = 0;
+char replyData[100];
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -84,9 +87,20 @@ void *keyboard(void *notused)
 					currentMode[type] = atoi(currentText);
 					pthread_mutex_unlock(&mutex);
 					printf("Mode of Type %d changed to '%d'\n",type, currentMode[type]);
+					if ((type==Intersection1 || type==Intersection2) && currentMode[type] <= 2)
+					{
+						currentMode[Intersection1] = currentMode[type];
+						currentMode[Intersection2] = currentMode[type];
+					}
+					if (currentMode[type] == FIXED_SYNCED && (type==Intersection1 || type==Intersection2)  ) {
+						synced = 0;
+					}
 				}
 				else if(dataType == 2)
 				{
+					replyDataType = dataType;
+					strcpy(replyData, currentText);
+					printf("changing timing values\n");
 					//get timing for intersection
 				}
 				else if(dataType == 3)
@@ -238,16 +252,24 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode[msg->type]);
-
+	replymsg.data = 0;
+	// send timer values data
+	if(replyDataType == 2)
+	{
+		replymsg.data = replyDataType;
+		replyDataType = 0;
+		strcpy(replymsg.buf, replyData);
+	}
 	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
 	printf("current node state '%d' from client (ID:%d)\n", msg->data, msg->ClientID);
 
 	fflush(stdout);
 
-	if (synced == 0 && currentMode[msg->type] == 0) {
-		printf("start Semaphore sync\n");
+	if (synced == 0 && currentMode[msg->type] == FIXED_SYNCED) {
+		int syncClients = 0;
 		if (semOpen == 0) {
+			printf("start Semaphore sync\n");
 			struct timespec now;
 			if( clock_gettime( CLOCK_REALTIME, &now) == -1 ) {
 				printf( "clock gettime error" );
@@ -257,6 +279,9 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 			for (int i = 0; i < maxClients; ++i) {
 				if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
 					if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
+						if (clientType[i] == Intersection1 || clientType[i] == Intersection2) {
+							syncClients++;
+						}
 						clientsAlive++;
 						clientStatus[i] = 1;
 					}
@@ -268,11 +293,23 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 				}
 			}
 			sem_unlink("/sync");
-			sem_sync = sem_open("/sync", O_CREAT,S_IRWXG, clientsAlive);
+			sem_sync = sem_open("/sync", O_CREAT,S_IRWXG, syncClients);
 			int value= 10;
 			sem_getvalue(sem_sync, &value);
+
 			printf("Sync started for %d clients\n", value);
 			semOpen = 1;
+		}
+		int value= 10;
+		sem_getvalue(sem_sync, &value);
+		if (value==0) {
+			printf("Nodes sync completed\n");
+			currentMode[Intersection1] = FIXED;
+			currentMode[Intersection2] = FIXED;
+			synced = 1;
+			//sem_close(sem_sync);
+			sem_unlink("/sync");
+			semOpen = 0;
 		}
 	}
 
