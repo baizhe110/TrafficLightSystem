@@ -33,24 +33,17 @@ void *stateMachineThread()
 
 	// means we will need to pass it by address
 
+
 	while (1)
 	{
 		if(TrainApproachint==1)
 		{
 			printf("State machine nows that train approaching\n");
 		}
-		if (switchingMode == 1) {
-			CurrentMode = FIXED;
-			printf("Changing mode...\t");
-		}
 		switch (CurrentMode) {
 		case FIXED:
 			printf("Fixed SM> \t");
 			CurrentState = SingleStep_TrafficLight_SM( &CurrentState ); // pass address
-			while(TrainApproachint==1)
-			{
-				CurrentState = EWR_NSG_EWTR_NSTR_10;
-			}
 			break;
 		case SENSOR:
 			printf("Sensor SM> \t");
@@ -92,6 +85,10 @@ int main(int argc, char *argv[])
 	//Initialize variables, specifying what mode to start up in
 	switchingMode = 0;
 	CurrentMode = FIXED;
+	CurrentState = EWR_NSR_EWTR_NSTR_0;
+
+	//Setting the currentSensor value to -1, meaning nothing approaching in sensor.
+	currentSensor = -1;
 
 
 	//Getting the hostname and printing to console that we now start intersection
@@ -101,8 +98,9 @@ int main(int argc, char *argv[])
 	hostnm[99] = '\n';
 	gethostname(hostnm, sizeof(hostnm));
 	printf("--> Machine hostname is: '%s'\n", hostnm);
+	printf("Intersection startup mode: %d\n", CurrentMode);
+	printf("Intersection startup state: %d\n",CurrentState);
 	printf("\n");
-	printf("Intersection Node started with mode: %d\n", CurrentMode);
 
 
 

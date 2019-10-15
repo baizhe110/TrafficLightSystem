@@ -22,17 +22,23 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 {
 	enum states CurState = *(enum states*)CurrentState;
 
+	if (switchingMode == 1 && desiredMode == 0) {
+		printf("Mode switched\n");
+		printf("Fixed SM> \t");
+		switchingMode = 0;
+		CurState = EWR_NSR_EWTR_NSTR_0;
+	}
+
 	switch (CurState)
 	{
 	case EWR_NSR_EWTR_NSTR_0:
+		DoSomething0();
 		if (TrainApproachint==1)
 		{
 			printf("Train approaching, changing to NSG\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
 		}
-		DoSomething0();
-		CurState = EWR_NSR_EWTG_NSTR_1;
 		if (switchingMode == 1) {
 			CurrentMode = desiredMode;
 			if(syncing)
@@ -56,10 +62,10 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 				// wait until data from central server signals all nodes ready
 				// if server not availiable continue manually
 				// if takes more than xxx time to manually
+
 			}
-			switchingMode = 0;
-			printf("Mode switched\n");
 		}
+		CurState = EWR_NSR_EWTG_NSTR_1;
 		break;
 	case EWR_NSR_EWTG_NSTR_1:
 		DoSomething1();
@@ -117,18 +123,18 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSR_EWTR_NSTR_9;
 		break;
 	case EWR_NSR_EWTR_NSTR_9:
+		DoSomething9();
 		if (switchingMode == 1) {
 			CurState = EWR_NSR_EWTR_NSTR_0;
 			break;
 		}
-		DoSomething9();
 		CurState = EWR_NSG_EWTR_NSTR_10;
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
 		DoSomething10();
 		if(TrainApproachint==1)
 		{
-		printf("Train approaching, staying in NSG\n");
+			printf("Train approaching, staying in NSG\n");
 		}
 		while(TrainApproachint==1)
 		{

@@ -28,8 +28,10 @@ char NewCarGlobal[3]="aaa";   // Declaring the global variable used for keyboard
 /*********************************************************************
  *			KEYBOARD INPUT FOR INCOMING CARS AND PEDESTRIANS
  *			Keyboard inputs:
- *					1. Car incoming from east west in the right turn lane: "ewt"
- *					2.
+ *					1. Car incoming from east west in the right turn lane: 	"ewt"
+ *					2. Car incoming from east west straight or left lane:  	"ew"
+ *					3. Car incoming from north east in the right turn lane: "nst"
+ *					4. Car incoming from north east straight or left lane: 	"ns"
  *********************************************************************/
 void *keyboard(void *notused)
 {
@@ -59,21 +61,44 @@ void *keyboard(void *notused)
 	}
 }
 
+
+
+
+
+/*********************************************************************
+ *					SENSOR DRIVEN STATE MACHINE
+ *********************************************************************/
 enum states SensorDrivenLightSequence(void *CurrentState)
 {
 	enum states CurState = *(enum states*)CurrentState;
 
 	static char NewCarReceive[3];
 
+	if (switchingMode == 1 && desiredMode == 1) {
+		printf("Mode switched\n");
+		printf("Sensor SM> \t");
+		switchingMode = 0;
+		CurState = EWR_NSR_EWTR_NSTR_0;
+	}
+
 	switch (CurState){
 	case EWR_NSR_EWTR_NSTR_0:
 		DoSomething0();
+
+		if (switchingMode == 1) {
+			CurrentMode = desiredMode;
+			break;
+		}
+
+		//First checking if any train is approaching. If so, going to NSG
 		if (TrainApproachint==1)
 		{
 			printf("Train approaching, changing to NSG\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
 		}
+
+		//Checking if any car is approaching. If not, going through to EWG
 		if(currentSensor == EWT_sensor)
 		{
 			printf("Car waiting, east west right turn\n");
@@ -100,25 +125,38 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 			CurState = EWG_NSR_EWTR_NSTR_4;
 		}
 		break;
+
 	case EWR_NSR_EWTG_NSTR_1:
 		DoSomething1();
 		CurState = EWR_NSR_EWTY_NSTR_2;
 		break;
+
 	case EWR_NSR_EWTY_NSTR_2:
 		DoSomething2();
 		CurState = EWR_NSR_EWTR_NSTR_3;
 		break;
+
 	case EWR_NSR_EWTR_NSTR_3:
 		DoSomething3();
+
+		//Checking if any train is approaching. If so, going to NSG
 		if (TrainApproachint==1)
 		{
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
 		}
+
 		CurState = EWG_NSR_EWTR_NSTR_4;
 		break;
+
 	case EWG_NSR_EWTR_NSTR_4:
 		DoSomething4();
+
+		/*Staying in this state until:
+		 * 			1. If any car approaching
+		 * 			2. If we want to change mode (To Fixed or Special)
+		 * 			3. If train is approaching
+		 */
 		while(CurState == EWG_NSR_EWTR_NSTR_4 && switchingMode == 0 && TrainApproachint != 1)
 		{
 			pthread_mutex_lock(&mutex);
@@ -145,24 +183,36 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 				CurState = EWG_NSR_EWTR_NSTR_4;
 			}
 		}
+
+		//If train approaching, we are out of while loop, and then goes through state 5-6 and then to 10 (NSG)
 		if(TrainApproachint == 1)
 		{
 			printf("Train approaching, changing to NSG\n");
 			CurState = EWY_NSR_EWTR_NSTR_5;
 		}
-		DoSomething4_1();
+
+		DoSomething4_1();	//Substate for pedestrian lights
+		if (switchingMode == 1) {
+			CurState = EWR_NSR_EWTR_NSTR_0;
+		}
 		break;
+
 	case EWY_NSR_EWTR_NSTR_5:
 		DoSomething5();
 		CurState = EWR_NSR_EWTR_NSTR_6;
 		break;
+
 	case EWR_NSR_EWTR_NSTR_6:
 		DoSomething6();
+
+		//Checking if any train is approaching. If so, going to NSG
 		if (TrainApproachint==1)
 		{
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
 		}
+
+		//Checking if any car is approaching. If not, going through to NSG
 		if(currentSensor == EWT_sensor)
 		{
 			printf("Car waiting, east west right turn\n");
