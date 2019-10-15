@@ -52,6 +52,12 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 	switch (CurState){
 	case EWR_NSR_EWTR_NSTR_0:
 		DoSomething0();
+		if (TrainApproachint==1)
+		{
+			printf("Train approaching, changing to NSG\n");
+			CurState = EWR_NSG_EWTR_NSTR_10;
+			break;
+		}
 		if(currentSensor == EWT_sensor)
 		{
 			printf("Car waiting, east west right turn\n");
@@ -88,11 +94,16 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSR_EWTR_NSTR_3:
 		DoSomething3();
+		if (TrainApproachint==1)
+		{
+			CurState = EWR_NSG_EWTR_NSTR_10;
+			break;
+		}
 		CurState = EWG_NSR_EWTR_NSTR_4;
 		break;
 	case EWG_NSR_EWTR_NSTR_4:
 		DoSomething4();
-		while(CurState == EWG_NSR_EWTR_NSTR_4 && switchingMode == 0)
+		while(CurState == EWG_NSR_EWTR_NSTR_4 && switchingMode == 0 && TrainApproachint != 1)
 		{
 			pthread_mutex_lock(&mutex);
 			strcpy(NewCarReceive,NewCarGlobal);
@@ -118,6 +129,11 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 				CurState = EWG_NSR_EWTR_NSTR_4;
 			}
 		}
+		if(TrainApproachint == 1)
+		{
+			printf("Train approaching, changing to NSG\n");
+			CurState = EWY_NSR_EWTR_NSTR_5;
+		}
 		DoSomething4_1();
 		break;
 	case EWY_NSR_EWTR_NSTR_5:
@@ -126,6 +142,11 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSR_EWTR_NSTR_6:
 		DoSomething6();
+		if (TrainApproachint==1)
+		{
+			CurState = EWR_NSG_EWTR_NSTR_10;
+			break;
+		}
 		if(currentSensor == EWT_sensor)
 		{
 			printf("Car waiting, east west right turn\n");
@@ -156,7 +177,14 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
 		DoSomething10();
-		while(CurState == EWR_NSG_EWTR_NSTR_10 && switchingMode == 0)
+		if(TrainApproachint == 1)
+		{
+			printf("Train approaching, staying in NSG\n");
+		}
+		while(TrainApproachint==1)
+		{
+		}
+		while(CurState == EWR_NSG_EWTR_NSTR_10 && switchingMode == 0 && TrainApproachint != 1)
 		{
 			pthread_mutex_lock(&mutex);
 			strcpy(NewCarReceive,NewCarGlobal);
@@ -181,6 +209,10 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 			{
 				CurState = EWR_NSG_EWTR_NSTR_10;
 			}
+		}
+		if(TrainApproachint == 1)
+		{
+			CurState = EWR_NSG_EWTR_NSTR_10;
 		}
 		DoSomething10_1();
 		break;

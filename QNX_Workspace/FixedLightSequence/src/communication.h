@@ -32,4 +32,5 @@ typedef struct
 	int mode;
 } my_reply;
 
+
 #endif /* SRC_COMMUNICATION_H_ */

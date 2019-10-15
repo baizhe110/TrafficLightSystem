@@ -32,6 +32,7 @@ typedef struct
 	int mode;
 } my_reply;
 
+int TrainApproachint;
 
 void *keyboard(void *notused);
 void *server();

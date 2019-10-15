@@ -75,5 +75,7 @@ int syncing;
 sem_t *sem_sync;
 
 
+int TrainApproachint;
+
 
 #endif /* SRC_DEFINES_H_ */

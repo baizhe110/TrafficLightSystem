@@ -192,6 +192,9 @@ void *ex_client(void *sname_data)
 				}
 			}
 		}
+
+		TrainApproachint = reply.TrainApproach;
+
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		//sleep(1);	// wait a few seconds before sending the next data packet
 	}

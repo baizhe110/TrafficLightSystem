@@ -27,6 +27,9 @@ int disattachPoint = 0; //for disattach message channel when shutdown central se
 struct timespec clientLastAlive[maxClients], startTime;
 int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
 
+TrainApproachint = 0;
+
+
 //for syncing
 sem_t *sem_sync;
 int synced = 0;
@@ -161,12 +164,12 @@ void *server()
 	while (living)
 	{
 		if (disattachPoint == 1) 		//if receive stop command, stop the while loop.
-				{
-					pthread_mutex_lock(&mutex);
-					living = 0;
-					pthread_mutex_unlock(&mutex);
+		{
+			pthread_mutex_lock(&mutex);
+			living = 0;
+			pthread_mutex_unlock(&mutex);
 
-				}
+		}
 		TimerTimeout( CLOCK_REALTIME, _NTO_TIMEOUT_RECEIVE,&timeOutEvent, &timeout, NULL ); //if no msg received after 10s, unblock the receive state
 
 		rcvid = MsgReceive(attach->chid, &msg, sizeof(msg), NULL);
@@ -232,8 +235,8 @@ void *server()
 				pthread_mutex_lock(&mutex);
 				living = 0;
 				pthread_mutex_unlock(&mutex);
-//				name_detach(attach, 0);
-//				printf("Communication channel detached.");
+				//				name_detach(attach, 0);
+				//				printf("Communication channel detached.");
 			}
 			// If the Global Name Service (gns) is running, name_open() sends a connect message. The server must EOK it.
 			if (msg.hdr.type == _IO_CONNECT )
@@ -279,12 +282,24 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	//clientType[msg->ClientID] = msg->type;
 	clientState[msg->type] = msg->state;
 	clientType[msg->type] = msg->type;
+
+	if(clientType[msg->type]==BoomGate)
+	{
+	TrainApproachint = msg->TrainApproach;
+	if(TrainApproachint==1)
+	{
+		printf("Train approaching\n",TrainApproachint);
+	}
+	}
 	// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
 	sprintf(replymsg.buf, "Current Mode: %d", currentMode[msg->type]);
 	replymsg.data = 0;
+
+	replymsg.TrainApproach = TrainApproachint;
+
 	// send timer values data
 	if(replyDataType == 2)
 	{
