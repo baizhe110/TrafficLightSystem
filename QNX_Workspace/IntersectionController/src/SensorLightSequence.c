@@ -74,6 +74,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 
 	static char NewCarReceive[3];
 
+	// If we want to change mode to sensor driven, then do this
 	if (switchingMode == 1 && desiredMode == 1) {
 		printf("Mode switched\n");
 		printf("Sensor SM> \t");
@@ -83,7 +84,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 
 	switch (CurState){
 	case EWR_NSR_EWTR_NSTR_0:
-		DoSomething0();
+		StateTime0();
 
 		if (switchingMode == 1) {
 			CurrentMode = desiredMode;
@@ -127,17 +128,17 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 
 	case EWR_NSR_EWTG_NSTR_1:
-		DoSomething1();
+		StateTime1();
 		CurState = EWR_NSR_EWTY_NSTR_2;
 		break;
 
 	case EWR_NSR_EWTY_NSTR_2:
-		DoSomething2();
+		StateTime2();
 		CurState = EWR_NSR_EWTR_NSTR_3;
 		break;
 
 	case EWR_NSR_EWTR_NSTR_3:
-		DoSomething3();
+		StateTime3();
 
 		//Checking if any train is approaching. If so, going to NSG
 		if (TrainApproachint==1)
@@ -150,7 +151,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		break;
 
 	case EWG_NSR_EWTR_NSTR_4:
-		DoSomething4();
+		StateTime4();
 
 		/*Staying in this state until:
 		 * 			1. If any car approaching
@@ -191,19 +192,19 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 			CurState = EWY_NSR_EWTR_NSTR_5;
 		}
 
-		DoSomething4_1();	//Substate for pedestrian lights
+		StateTime4_1();	//Substate for pedestrian lights
 		if (switchingMode == 1) {
 			CurState = EWR_NSR_EWTR_NSTR_0;
 		}
 		break;
 
 	case EWY_NSR_EWTR_NSTR_5:
-		DoSomething5();
+		StateTime5();
 		CurState = EWR_NSR_EWTR_NSTR_6;
 		break;
 
 	case EWR_NSR_EWTR_NSTR_6:
-		DoSomething6();
+		StateTime6();
 
 		//Checking if any train is approaching. If so, going to NSG
 		if (TrainApproachint==1)
@@ -230,19 +231,19 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		}
 		break;
 	case EWR_NSR_EWTR_NSTG_7:
-		DoSomething7();
+		StateTime7();
 		CurState = EWR_NSR_EWTR_NSTY_8;
 		break;
 	case EWR_NSR_EWTR_NSTY_8:
-		DoSomething8();
+		StateTime8();
 		CurState = EWR_NSR_EWTR_NSTR_9;
 		break;
 	case EWR_NSR_EWTR_NSTR_9:
-		DoSomething9();
+		StateTime9();
 		CurState = EWR_NSG_EWTR_NSTR_10;
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
-		DoSomething10();
+		StateTime10();
 		if(TrainApproachint == 1)
 		{
 			printf("Train approaching, staying in NSG\n");
@@ -280,10 +281,13 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		{
 			CurState = EWR_NSG_EWTR_NSTR_10;
 		}
-		DoSomething10_1();
+		if (switchingMode == 1) {
+			CurState = EWR_NSR_EWTR_NSTR_0;
+		}
+		StateTime10_1();
 		break;
 	case EWR_NSY_EWTR_NSTR_11:
-		DoSomething11();
+		StateTime11();
 		CurState = EWR_NSR_EWTR_NSTR_0;
 		break;
 	}

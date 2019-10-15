@@ -2,8 +2,8 @@
  *			STATE MACHINE FUNCTIONS AND FUNCTIONS FOR TIMERS
  *
  * 				Includes:
- * 					1. DoSomething state machine functions
- * 					2. Timer function: startOneTimeTimer. (Counter for the DoSomething functions)
+ * 					1. StateTime state machine functions
+ * 					2. Timer function: startOneTimeTimer. (Counter for the StateTime functions)
  * 					3.
  *********************************************************************/
 
@@ -24,42 +24,42 @@ char *progname = "timer_per1.c"; 		//Pointer for timer
 
 
 /*********************************************************************
- *	DoSomething functions for the state machine (Used both for fixed sequence and sensor driven)
+ *	StateTime functions for the state machine (Used both for fixed sequence and sensor driven)
  *********************************************************************/
-void DoSomething0()
+void StateTime0()
 {
 	printf("In state0: EWR_NSR_EWTR_NSTR_0\n");
 	startOneTimeTimer(timer_id, times.NSR_clear);
 	//timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething1()
+void StateTime1()
 {
 	printf("In state1: EWR_NSR_EWTG_NSTR_1\n");
 	startOneTimeTimer(timer_id, times.EWTG_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething2()
+void StateTime2()
 {
 	printf("In state2: EWR_NSR_EWTY_NSTR_2\n");
 	startOneTimeTimer(timer_id, times.EWTY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 
 }
-void DoSomething3()
+void StateTime3()
 {
 	printf("In state3: EWR_NSR_EWTR_NSTR_3\n");
 	startOneTimeTimer(timer_id, times.EWTR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething4()
+void StateTime4()
 {
 	printf("In state4: EWG_NSR_EWTR_NSTR_4\n");
 	startOneTimeTimer(timer_id, times.EWG_car-times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 
 }
-void DoSomething4_1()
+void StateTime4_1()
 {
 	if(CurrentMode == FIXED)
 	{
@@ -72,43 +72,43 @@ void DoSomething4_1()
 	startOneTimeTimer(timer_id, times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething5()
+void StateTime5()
 {
 	printf("In state5: EWY_NSR_EWTR_NSTR_5\n");
 	startOneTimeTimer(timer_id, times.EWY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething6()
+void StateTime6()
 {
 	printf("In state6: EWR_NSR_EWTR_NSTR_6\n");
 	startOneTimeTimer(timer_id, times.EWR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething7()
+void StateTime7()
 {
 	printf("In state7: EWR_NSR_EWTR_NSTG_7\n");
 	startOneTimeTimer(timer_id, times.NSTG_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething8()
+void StateTime8()
 {
 	printf("In state8: EWR_NSR_EWTR_NSTY_8\n");
 	startOneTimeTimer(timer_id, times.NSTY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething9()
+void StateTime9()
 {
 	printf("In state9: EWR_NSR_EWTR_NSTR_9\n");
 	startOneTimeTimer(timer_id, times.NSTR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething10()
+void StateTime10()
 {
 	printf("In state10: EWR_NSG_EWTR_NSTR_10\n");
 	startOneTimeTimer(timer_id, times.NSG_car-times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething10_1()
+void StateTime10_1()
 {
 	if(CurrentMode == FIXED)
 	{
@@ -121,7 +121,7 @@ void DoSomething10_1()
 	startOneTimeTimer(timer_id, times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
-void DoSomething11()
+void StateTime11()
 {
 	printf("In state11: EWR_NSY_EWTR_NSTR_11\n");
 	startOneTimeTimer(timer_id, times.NSY_car);
@@ -136,7 +136,7 @@ void DoSomething11()
 
 
 /*********************************************************************
- *	Timer that counts for the specified input time (Used for the DoSomething functions)
+ *	Timer that counts for the specified input time (Used for the StateTime functions)
  *********************************************************************/
 void startOneTimeTimer(timer_t timerID, double time)
 {
@@ -150,8 +150,11 @@ void startOneTimeTimer(timer_t timerID, double time)
 
 
 
+
+
+
 /*********************************************************************
- *	Initialisation of timer
+ *	Initialization of timer
  *********************************************************************/
 void initTimer()
 {

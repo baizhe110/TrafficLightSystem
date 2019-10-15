@@ -32,7 +32,7 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 	switch (CurState)
 	{
 	case EWR_NSR_EWTR_NSTR_0:
-		DoSomething0();
+		StateTime0();
 		if (TrainApproachint==1)
 		{
 			printf("Train approaching, changing to NSG\n");
@@ -68,17 +68,17 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSR_EWTG_NSTR_1;
 		break;
 	case EWR_NSR_EWTG_NSTR_1:
-		DoSomething1();
+		StateTime1();
 		CurState = EWR_NSR_EWTY_NSTR_2;
 		break;
 	case EWR_NSR_EWTY_NSTR_2:
-		DoSomething2();
+		StateTime2();
 		CurState = EWR_NSR_EWTR_NSTR_3;
 		break;
 	case EWR_NSR_EWTR_NSTR_3:
+		StateTime3();
 		if (TrainApproachint==1)
 		{
-			DoSomething3();
 			printf("Train approaching, changing to NSG\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
@@ -87,22 +87,21 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 			CurState = EWR_NSR_EWTR_NSTR_0;
 			break;
 		}
-		DoSomething3();
 		CurState = EWG_NSR_EWTR_NSTR_4;
 		break;
 	case EWG_NSR_EWTR_NSTR_4:
-		DoSomething4();
-		DoSomething4_1();
+		StateTime4();
+		StateTime4_1();
 		CurState = EWY_NSR_EWTR_NSTR_5;
 		break;
 	case EWY_NSR_EWTR_NSTR_5:
-		DoSomething5();
+		StateTime5();
 		CurState = EWR_NSR_EWTR_NSTR_6;
 		break;
 	case EWR_NSR_EWTR_NSTR_6:
+		StateTime6();
 		if (TrainApproachint==1)
 		{
-			DoSomething6();
 			printf("Train approaching, changing to NSG\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
 			break;
@@ -111,19 +110,18 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 			CurState = EWR_NSR_EWTR_NSTR_0;
 			break;
 		}
-		DoSomething6();
 		CurState = EWR_NSR_EWTR_NSTG_7;
 		break;
 	case EWR_NSR_EWTR_NSTG_7:
-		DoSomething7();
+		StateTime7();
 		CurState = EWR_NSR_EWTR_NSTY_8;
 		break;
 	case EWR_NSR_EWTR_NSTY_8:
-		DoSomething8();
+		StateTime8();
 		CurState = EWR_NSR_EWTR_NSTR_9;
 		break;
 	case EWR_NSR_EWTR_NSTR_9:
-		DoSomething9();
+		StateTime9();
 		if (switchingMode == 1) {
 			CurState = EWR_NSR_EWTR_NSTR_0;
 			break;
@@ -131,7 +129,7 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		CurState = EWR_NSG_EWTR_NSTR_10;
 		break;
 	case EWR_NSG_EWTR_NSTR_10:
-		DoSomething10();
+		StateTime10();
 		if(TrainApproachint==1)
 		{
 			printf("Train approaching, staying in NSG\n");
@@ -140,11 +138,11 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		{
 
 		}
-		DoSomething10_1();
+		StateTime10_1();
 		CurState = EWR_NSY_EWTR_NSTR_11;
 		break;
 	case EWR_NSY_EWTR_NSTR_11:
-		DoSomething11();
+		StateTime11();
 		CurState = EWR_NSR_EWTR_NSTR_0;
 		break;
 	}

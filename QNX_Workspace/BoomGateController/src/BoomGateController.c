@@ -1,3 +1,12 @@
+/*********************************************************************
+ *						BOOMGATE CONTROLLER
+ *
+ * 				Includes:
+ * 					1. Set timer values
+ * 					2. MAIN (For boom gate controller)
+ *********************************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -5,42 +14,25 @@
 #include <time.h>
 #include <sys/netmgr.h>
 #include <sys/neutrino.h>
+#include <sys/dispatch.h>
 
 #include "BoomGateController.h"
 
 
-#include <sys/dispatch.h>
 
 
+/*********************************************************************
+ *	Declaring and defining variables etc.
+ *********************************************************************/
 char *progname = "timer_per1.c";
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;  // needs to be set to PTHREAD_MUTEX_INITIALIZER;
 
-char NewTrainGlobal[3]="aaa";
+char NewTrainGlobal[1]="a";
+enum BoomGate_mode CurrentMode;
+enum states CurrentState; // Declaring the enum within the main
 
 // for timer and message receive
-
-
-struct Timervalues times;
-
-void setTimerValues()
-{
-	times.NSG_car 	= 4;
-	times.NSB_ped 	= 1;
-	times.NSTG_car 	= 4;
-	times.NSY_car 	= 2;
-	times.NSTY_car 	= 2;
-	times.NSR_clear	= 1;
-	times.NSTR_clear= 1;
-
-	times.EWG_car	= 4;
-	times.EWB_ped	= 1;
-	times.EWTG_car	= 4;
-	times.EWY_car	= 2;
-	times.EWTY_car	= 2;
-	times.EWR_clear = 1;
-	times.EWTR_clear= 1;
-}
 
 typedef union
 {
@@ -56,59 +48,98 @@ int TrainApproachint = 0;
 // timer variables
 struct itimerspec itime1;
 
+struct Timervalues times;
 
-void DoSomething0()
+
+
+
+
+/*********************************************************************
+ *	Set timer values for states
+ *********************************************************************/
+void setTimerValues()
+{
+	times.NoTrain 			= 1;	// No train time is zero to ensure zero waiting time IF train approaching
+	times.TrainApproaching1 = 2;	// Blinking red lights (before boom gates go down)
+	times.TrainApproaching2 = 2;	// Boom gates going down, red lights blink
+	times.TrainCrossing 	= 4;	// Train crossing, boom gates down, red lights blink
+	times.TrainLeaving1 	= 2;	// Boom gates going up, red lights blink
+	times.TrainLeaving2		= 2;	// Boom gates up, red lights blink
+}
+
+
+
+
+
+
+/*********************************************************************
+ *	StateTime functions for the state machine
+ *********************************************************************/
+void StateTime0()
 {
 	printf("In state0: NoTrain_0\n");
-	startOneTimeTimer(timer_id, times.NSR_clear);
+	startOneTimeTimer(timer_id, times.NoTrain);
 	//timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
-void DoSomething1()
+void StateTime1()
 {
 	printf("In state1: TrainApproaching_1\n");
-	startOneTimeTimer(timer_id, times.EWTG_car);
+	startOneTimeTimer(timer_id, times.TrainApproaching1);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
-void DoSomething2()
+void StateTime2()
 {
 	printf("In state2: TrainApproaching_2\n");
-	startOneTimeTimer(timer_id, times.EWTY_car);
+	startOneTimeTimer(timer_id, times.TrainApproaching2);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
-
 }
-void DoSomething3()
+void StateTime3()
 {
 	printf("In state3: TrainCrossing_3\n");
-	startOneTimeTimer(timer_id, times.EWTR_clear);
+	startOneTimeTimer(timer_id, times.TrainCrossing);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
-void DoSomething4()
+void StateTime4()
 {
 	printf("In state4: TrainLeaving_4\n");
-	startOneTimeTimer(timer_id, times.EWG_car-times.EWB_ped);
+	startOneTimeTimer(timer_id, times.TrainLeaving1);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 
 }
-void DoSomething5()
+void StateTime5()
 {
 	printf("In state5: TrainLeaving_5\n");
-	startOneTimeTimer(timer_id, times.EWY_car);
+	startOneTimeTimer(timer_id, times.TrainLeaving2);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 
 
-////////////////// - Timers -//////////////////////////////////////
+
+
+
+
+/*********************************************************************
+ *	Timer that counts for the specified input time (Used for the StateTime functions)
+ *********************************************************************/
 void startOneTimeTimer(timer_t timerID, double time)
 {
 	double x = time;
 	x += 0.5e-9;
 	itime1.it_value.tv_sec = (long) x;
 	itime1.it_value.tv_nsec = (x - itime1.it_value.tv_sec) * 1000000000L;
-	//printf("%ld %ld\n", itime1.it_value.tv_sec, itime1.it_value.tv_nsec);
 	timer_settime(timerID, 0, &itime1, NULL);
 }
 
+
+
+
+
+
+
+/*********************************************************************
+ *	Initialization of timer
+ *********************************************************************/
 void initTimer()
 {
 	chid_Timer= ChannelCreate(0); // Create a communications channel
@@ -142,28 +173,38 @@ void initTimer()
 
 
 
+/*********************************************************************
+ *			KEYBOARD INPUT FOR INCOMING CARS AND PEDESTRIANS
+ *			Keyboard inputs:
+ *					1. Train approaching: 	"T"
+ *********************************************************************/
 void *keyboard(void *notused)
 {
-	char NewTrainKey[3];
+	char NewTrainKey[1];
 	while(1)
 	{
 		scanf(" %s",&NewTrainKey);
 		pthread_mutex_lock(&mutex);
 		strcpy(NewTrainGlobal,NewTrainKey);
 		pthread_mutex_unlock(&mutex);
-		printf("'%s'\n",&NewTrainGlobal);
 	}
 }
 
+
+
+
+/*********************************************************************
+ *							STATE MACHINE
+ *********************************************************************/
 enum states BoomGateSequence(void *CurrentState)
 {
 	enum states CurState = *(enum states*)CurrentState;
 
-	static char NewTrainReceive[3];
+	static char NewTrainReceive[1];
 
 	switch (CurState){
 	case NoTrain_0:
-		DoSomething0();
+		StateTime0();
 		while(CurState == NoTrain_0){
 			pthread_mutex_lock(&mutex);
 			strcpy(NewTrainReceive,NewTrainGlobal);
@@ -185,23 +226,23 @@ enum states BoomGateSequence(void *CurrentState)
 
 		break;
 	case TrainApproaching_1:
-		DoSomething1();
+		StateTime1();
 		CurState = TrainApproaching_2;
 		break;
 	case TrainApproaching_2:
-		DoSomething2();
+		StateTime2();
 		CurState = TrainCrossing_3;
 		break;
 	case TrainCrossing_3:
-		DoSomething3();
+		StateTime3();
 		CurState = TrainLeaving_4;
 		break;
 	case TrainLeaving_4:
-		DoSomething4();
+		StateTime4();
 		CurState = TrainLeaving_5;
 		break;
 	case TrainLeaving_5:
-		DoSomething5();
+		StateTime5();
 		CurState = NoTrain_0;
 		pthread_mutex_lock(&mutex);
 		TrainApproachint = 0;
@@ -211,16 +252,21 @@ enum states BoomGateSequence(void *CurrentState)
 	return CurState;
 }
 
-enum BoomGate_mode mode = NORMAL;
-enum states CurrentState=0; // Declaring the enum within the main
 
+
+
+
+/*********************************************************************
+ *					STATE MACHINE (MAIN) THREAD
+ *			Controls which mode to be in (Normal SM or Special)
+ *********************************************************************/
 void *stateMachineThread()
 {
 	// means we will need to pass it by address
 
 	while (1)
 	{
-		switch (mode) {
+		switch (CurrentMode) {
 		case NORMAL:
 			printf("Normal Sequence> \t");
 			CurrentState = BoomGateSequence( &CurrentState ); // pass address
@@ -234,9 +280,15 @@ void *stateMachineThread()
 	}
 }
 
-void *sendCurrentState(void *notused){
 
-	printf("Send Current State thread now running\n");
+
+
+
+/*********************************************************************
+ * 					Client (Native message passing)
+ *********************************************************************/
+void *ClientBoomGate(void *notused){
+
 	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
 	my_data msg;
 	my_reply reply;
@@ -248,14 +300,19 @@ void *sendCurrentState(void *notused){
 	int server_coid;
 	int index = 0;
 
+	printf("\n");
 	printf("  ---> Trying to connect to server named: %s\n", QNET_ATTACH_POINT);
+	printf("\n");
+
 	while((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
 	{
 		//printf("Could not connect to server!\n");
 		sleep(1);
 	}
 
+	printf("\n");
 	printf("Connection established to: %s\n", QNET_ATTACH_POINT);
+	printf("\n");
 
 	// We would have pre-defined data to stuff here
 	msg.hdr.type = 0x00;
@@ -299,7 +356,7 @@ void *sendCurrentState(void *notused){
 		else
 		{ // now process the reply
 //			printf("   -->Reply is: '%s'\n", reply.buf);
-			mode = reply.mode;
+			CurrentMode = reply.mode;
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		sleep(2);	// wait a few seconds before sending the next data packet
@@ -313,20 +370,46 @@ void *sendCurrentState(void *notused){
 
 
 
-// Intersection Node starting point
+
+
+
+
+/*********************************************************************
+ *							BOOMGATE MAIN
+ * 				Starting point for the boomgate node!
+ *********************************************************************/
 int main(int argc, char *argv[])
 {
-	pthread_t stateMachine, keyboarInput, sendCurrentStateThread;
 
-	printf("Boom gate controller started\n");
+	//Declaring threads
+	pthread_t stateMachine, keyboarInput, ClientBoomGateThread;
+
+	//Initialize variables, specifying what mode to start up in
+	CurrentMode = NORMAL;
+	CurrentState = NoTrain_0;
+
+	//Getting the hostname and printing to console that we now start intersection
+	printf("Boom Gate Controller starts now...\n");
+	char hostnm[100];
+	memset(hostnm, '\0', 100);
+	hostnm[99] = '\n';
+	gethostname(hostnm, sizeof(hostnm));
+	printf("--> Machine hostname is: '%s'\n", hostnm);
+	printf("Boom gate startup mode: %d\n", CurrentMode);
+	printf("Boom gate startup state: %d\n",CurrentState);
+	printf("\n");
 
 
+
+	/******   Setting up the QNX timer to be used in the timing of the traffic lights (states)  ******/
 	initTimer();
 	setTimerValues();
 
-	pthread_create(&sendCurrentStateThread, NULL, sendCurrentState, NULL);
-	pthread_create(&keyboarInput, NULL, keyboard, NULL);
-	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
+
+	// Starting up threads
+	pthread_create(&ClientBoomGateThread, NULL, ClientBoomGate, NULL);		// Communication between boomgate(client) and CentralServer(server)
+	pthread_create(&keyboarInput, NULL, keyboard, NULL);					// Keyboard input
+	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);				// State machine
 
 	pthread_join(stateMachine,NULL);
 

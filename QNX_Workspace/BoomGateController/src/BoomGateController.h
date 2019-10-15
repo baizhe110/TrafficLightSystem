@@ -54,21 +54,12 @@ typedef struct
 	int mode;
 } my_reply;
 struct Timervalues{
-	double NSG_car;
-	double NSB_ped;
-	double NSTG_car;
-	double NSY_car;
-	double NSTY_car;
-	double NSR_clear;
-	double NSTR_clear;
-
-	double EWG_car;
-	double EWB_ped;
-	double EWTG_car;
-	double EWY_car;
-	double EWTY_car;
-	double EWR_clear;
-	double EWTR_clear;
+	double NoTrain;
+	double TrainApproaching1;
+	double TrainApproaching2;
+	double TrainCrossing;
+	double TrainLeaving1;
+	double TrainLeaving2;
 };
 enum BoomGate_mode {
 	NORMAL,

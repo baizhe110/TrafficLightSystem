@@ -43,19 +43,19 @@ void initTimer();
 void startOneTimeTimer(timer_t timerID, double time);
 void setTimerValues();
 
-void DoSomething0();
-void DoSomething1();
-void DoSomething2();
-void DoSomething3();
-void DoSomething4();
-void DoSomething4_1();
-void DoSomething5();
-void DoSomething6();
-void DoSomething7();
-void DoSomething8();
-void DoSomething9();
-void DoSomething10();
-void DoSomething10_1();
-void DoSomething11();
+void StateTime0();
+void StateTime1();
+void StateTime2();
+void StateTime3();
+void StateTime4();
+void StateTime4_1();
+void StateTime5();
+void StateTime6();
+void StateTime7();
+void StateTime8();
+void StateTime9();
+void StateTime10();
+void StateTime10_1();
+void StateTime11();
 
 #endif /* SRC_STATETASKS_H_ */

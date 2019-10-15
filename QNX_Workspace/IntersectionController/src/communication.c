@@ -1,29 +1,43 @@
-/*
- * communication.c
+/*********************************************************************
+ *						COMMUNICATION THREAD
  *
- *  Created on: 3 Oct 2019
- *      Author: bruno
- */
+ * 				Includes:
+ * 					1. Client (Native message passing)
+ *********************************************************************/
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <fcntl.h>
 #include <share.h>
 #include <pthread.h>
-#include "communication.h"
-#include "stateTasks.h"
-#include "defines.h"
 #include <time.h>
 #include <sys/netmgr.h>
 #include <sys/neutrino.h>
 #include <errno.h>
 #include <semaphore.h>
 
+#include "communication.h"
+#include "stateTasks.h"
+#include "defines.h"
+
+
+
+
+
+
 char *prognames = "timer_per1.c";
 
 TrainApproachint = 0;
 
-// Sends current state to central controller every xxx seconds
+
+
+
+
+/*********************************************************************
+ * 					Client (Native message passing)
+ *********************************************************************/
 void *ex_client(void *sname_data)
 {
 	struct sigevent         event;
