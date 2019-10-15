@@ -1,9 +1,11 @@
-/*
- * intersection.c
+/*********************************************************************
+ *						INTERSECTION CONTROLLER
  *
- *  Created on: 1 Oct 2019
- *      Author: bruno
- */
+ * 				Includes:
+ * 					1. State machine (main) thread
+ * 					2. MAIN (For intersection controller)
+ *********************************************************************/
+
 
 #include <pthread.h>
 #include "defines.h"
@@ -19,6 +21,13 @@
 //pthread_mutex_t mutex= PTHREAD_MUTEX_INITIALIZER;
 
 
+
+
+
+/*********************************************************************
+ *					STATE MACHINE (MAIN) THREAD
+ *				Controls which state machine to call
+ *********************************************************************/
 void *stateMachineThread()
 {
 
@@ -28,7 +37,7 @@ void *stateMachineThread()
 	{
 		if(TrainApproachint==1)
 		{
-		printf("State machine nows that train approaching\n");
+			printf("State machine nows that train approaching\n");
 		}
 		if (switchingMode == 1) {
 			CurrentMode = FIXED;
@@ -62,17 +71,44 @@ void *stateMachineThread()
 }
 
 
-// Intersection Node starting point
+
+
+
+
+
+
+
+/*********************************************************************
+ *							INTERSECTION MAIN
+ * 				Starting point for the intersection node!
+ *********************************************************************/
 int main(int argc, char *argv[])
 {
-	pthread_t stateMachine, keyboarInput;
 
-	printf("Intersection Node started with mode: %d\n", CurrentMode);
+	//Declaring threads
+	pthread_t stateMachine, keyboarInput, th3_client;
 
+
+	//Initialize variables, specifying what mode to start up in
 	switchingMode = 0;
 	CurrentMode = FIXED;
-	initTimer();
 
+
+	//Getting the hostname and printing to console that we now start intersection
+	printf("Intersection Controller starts now...\n");
+	char hostnm[100];
+	memset(hostnm, '\0', 100);
+	hostnm[99] = '\n';
+	gethostname(hostnm, sizeof(hostnm));
+	printf("--> Machine hostname is: '%s'\n", hostnm);
+	printf("\n");
+	printf("Intersection Node started with mode: %d\n", CurrentMode);
+
+
+
+	/******   Setting up the QNX timer to be used in the timing of the traffic lights (states)  ******/
+
+	initTimer(); 					//Initialization
 	struct Timervalues t;
 	t.NSG_car 	= 4;
 	t.NSB_ped 	= 1;
@@ -81,7 +117,7 @@ int main(int argc, char *argv[])
 	t.NSTY_car 	= 2;
 	t.NSR_clear	= 1;
 	t.NSTR_clear= 1;
-
+									// Setting the initial timings for the lights
 	t.EWG_car	= 4;
 	t.EWB_ped	= 1;
 	t.EWTG_car	= 4;
@@ -89,15 +125,16 @@ int main(int argc, char *argv[])
 	t.EWTY_car	= 2;
 	t.EWR_clear = 1;
 	t.EWTR_clear= 1;
-	setTimerValues(t);
+	setTimerValues(t); 				// Calling/sending timings to the function that sets the timer values
 
-	pthread_create(&keyboarInput, NULL, keyboard, NULL);
-	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
-	char val[100] = attachPoint;
-	//strcpy(val, QNET_ATTACH_POINT);
-	//printf("The attachpoint is located in the following directory: %s \n", val);
-	pthread_t  th3_client;
-	pthread_create (&th3_client, NULL, ex_client, val);
 
-	pthread_join(stateMachine,NULL);
+
+	// Starting up threads
+	pthread_create(&keyboarInput, NULL, keyboard, NULL);  		// Keyboard input, simulating cars and pedestrians in sensor mode
+	pthread_create(&stateMachine,NULL,stateMachineThread,NULL); // Starting up the state machine for the intersection
+
+	char val[100] = attachPoint; 								// Setting the attachpoint directory in a character string
+	pthread_create (&th3_client, NULL, ex_client, val); 		// Starting up the client to communicated between intersection and centralserver
+
+	pthread_join(stateMachine,NULL);							// Waiting here until the state machine thread is complete (But never happens)
 }

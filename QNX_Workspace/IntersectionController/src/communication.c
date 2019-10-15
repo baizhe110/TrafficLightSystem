@@ -78,16 +78,18 @@ void *ex_client(void *sname_data)
 	int server_coid;
 	int index = 0;
 
+	printf("\n");
 	printf("  ---> Trying to connect to server named: %s\n", sname);
+	printf("\n");
 
 	while((server_coid = name_open(sname, 0)) == -1)
 	{
 		//printf("Could not connect to server!\n");
 		sleep(1);
 	}
-
+	printf("\n");
 	printf("Connection established to: %s\n", sname);
-
+	printf("\n");
 	// We would have pre-defined data to stuff here
 	msg.hdr.type = 0x00;
 	msg.hdr.subtype = 0x00;
@@ -198,7 +200,7 @@ void *ex_client(void *sname_data)
 
 		TrainApproachint = reply.TrainApproach;
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
-		//sleep(1);	// wait a few seconds before sending the next data packet
+
 	}
 
 	// Close the connection

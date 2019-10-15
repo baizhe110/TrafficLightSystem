@@ -1,3 +1,10 @@
+/*********************************************************************
+ *					FIXED LIGHT SEQUENCE STATE MACHINE
+ *
+ * 				Includes:
+ * 					1. Fixed light sequence state machine
+ *********************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

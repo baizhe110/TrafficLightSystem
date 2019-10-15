@@ -21,6 +21,7 @@
 
 char *prognames = "timer_per1.c";
 int currentMode[maxClients];
+int stateOld;
 int clientsAlive = 0;
 int clientsDead = 0;
 int disattachPoint = 0; //for disattach message channel when shutdown central servewr
@@ -178,7 +179,7 @@ void *server()
 
 		if (rcvid == -1)  // Error condition, exit
 		{
-			printf("\nFailed to MsgReceive\n");
+			printf("\nFailed to MsgReceive. Nothing to receive -> No clients\n");
 			continue;
 		}
 
@@ -194,13 +195,13 @@ void *server()
 				if( Stay_alive == 0)
 				{
 					ConnectDetach(msg.hdr.scoid);
-					printf("\nServer was told to Detach from ClientID:%s ...\n", msg.ClientID);
+					printf("\nServer was told to Detach from Client: %s ...\n", msg.ClientID);
 					living = 0; // kill while loop
 					continue;
 				}
 				else
 				{
-					printf("\nServer received Detach pulse from ClientID:%s but rejected it ...\n", msg.ClientID);
+					printf("\nServer received Detach pulse from Client: %s but rejected it ...\n", msg.ClientID);
 				}
 				break;
 
@@ -311,8 +312,14 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		strcpy(replymsg.buf, replyData);
 	}
 	replymsg.mode = currentMode[msg->type];
+
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("%s state received to be: '%d'\n", msg->ClientID, msg->state);
+
+	if(stateOld != msg->state)
+	{
+	printf("%s> \t in state: '%d'\n", msg->ClientID, msg->state);
+	}
+	stateOld = msg->state;
 
 	fflush(stdout);
 
@@ -363,7 +370,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		}
 	}
 
-	sleep(1); // Delay the reply by a second (just for demonstration purposes)
+//	usleep(100000); // Delay the reply by a second (just for demonstration purposes)
 
 	//printf("\n    -----> replying with: mode: '%d'\n",replymsg.mode);
 	MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
@@ -441,7 +448,9 @@ void *ex_timerCheckAlive(void * val)
 		}
 		if(clientsAlive != clientsAliveOld || clientsDead != clientsDeadOld)
 		{
+			printf("\n");
 			printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);
+			printf("\n");
 		}
 		clientsAliveOld = clientsAlive;
 		clientsDeadOld = clientsDead;

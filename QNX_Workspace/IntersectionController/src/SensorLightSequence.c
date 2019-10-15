@@ -1,3 +1,12 @@
+/*********************************************************************
+ *						SENSOR DRIVEN STATE MACHINE
+ *
+ * 				Includes:
+ * 					1. Keyboard input (To simulate incoming cars and pedestrians)
+ * 					2. Sensor driven state machine
+ *********************************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -9,17 +18,26 @@
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;  // needs to be set to PTHREAD_MUTEX_INITIALIZER;
 
-char NewCarGlobal[3]="aaa";
-
-// for timer and message receive
+char NewCarGlobal[3]="aaa";   // Declaring the global variable used for keyboard input
 
 
+
+
+
+
+/*********************************************************************
+ *			KEYBOARD INPUT FOR INCOMING CARS AND PEDESTRIANS
+ *			Keyboard inputs:
+ *					1. Car incoming from east west in the right turn lane: "ewt"
+ *					2.
+ *********************************************************************/
 void *keyboard(void *notused)
 {
 	char NewCarKey[3];
 	while(1)
 	{
-		scanf(" %s",&NewCarKey);
+		scanf(" %s",&NewCarKey);			//Waiting here for a input from the keyboard
+
 		pthread_mutex_lock(&mutex);
 		if(strcmp("ewt",NewCarKey) == 0)
 		{
@@ -37,9 +55,7 @@ void *keyboard(void *notused)
 		{
 			currentSensor = NS_sensor;
 		}
-		//strcpy(NewCarGlobal,NewCarKey);
 		pthread_mutex_unlock(&mutex);
-//		printf("'%s'\n",&NewCarGlobal);
 	}
 }
 

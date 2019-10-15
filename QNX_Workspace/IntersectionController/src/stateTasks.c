@@ -1,20 +1,31 @@
-/*
- * stateTasks.c
+/*********************************************************************
+ *			STATE MACHINE FUNCTIONS AND FUNCTIONS FOR TIMERS
  *
- *  Created on: 1 Oct 2019
- *      Author: bruno
- */
+ * 				Includes:
+ * 					1. DoSomething state machine functions
+ * 					2. Timer function: startOneTimeTimer. (Counter for the DoSomething functions)
+ * 					3.
+ *********************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/iofunc.h>
 #include <sys/netmgr.h>
-#include "defines.h"
 
+#include "defines.h"
 #include "stateTasks.h"
 
-char *progname = "timer_per1.c";
 
+
+
+char *progname = "timer_per1.c"; 		//Pointer for timer
+
+
+
+/*********************************************************************
+ *	DoSomething functions for the state machine (Used both for fixed sequence and sensor driven)
+ *********************************************************************/
 void DoSomething0()
 {
 	printf("In state0: EWR_NSR_EWTR_NSTR_0\n");
@@ -118,17 +129,30 @@ void DoSomething11()
 }
 
 
-////////////////// - Timers -//////////////////////////////////////
+
+
+
+
+
+
+/*********************************************************************
+ *	Timer that counts for the specified input time (Used for the DoSomething functions)
+ *********************************************************************/
 void startOneTimeTimer(timer_t timerID, double time)
 {
 	double x = time;
 	x += 0.5e-9;
 	itime1.it_value.tv_sec = (long) x;
 	itime1.it_value.tv_nsec = (x - itime1.it_value.tv_sec) * 1000000000L;
-	//printf("%ld %ld\n", itime1.it_value.tv_sec, itime1.it_value.tv_nsec);
 	timer_settime(timerID, 0, &itime1, NULL);
 }
 
+
+
+
+/*********************************************************************
+ *	Initialisation of timer
+ *********************************************************************/
 void initTimer()
 {
 	chid = ChannelCreate(0); // Create a communications channel
@@ -157,6 +181,12 @@ void initTimer()
 		exit (EXIT_FAILURE);
 	}
 }
+
+
+
+/*********************************************************************
+ *				TIMER VALUES SETTING FUNCTION
+ *********************************************************************/
 void setTimerValues(struct Timervalues t)
 {
 //	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,

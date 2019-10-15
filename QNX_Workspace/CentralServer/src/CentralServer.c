@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
 	printf("Central Controller starts now...\n");
-	printf ("--> The pid of this process is %d\n", getpid() );
+//	printf ("--> The pid of this process is %d\n", getpid() );
 
 	char hostnm[100];
 	memset(hostnm, '\0', 100);
