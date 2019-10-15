@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/iofunc.h>
 #include <sys/netmgr.h>
+#include "defines.h"
 
 #include "stateTasks.h"
 
@@ -49,7 +50,14 @@ void DoSomething4()
 }
 void DoSomething4_1()
 {
-	printf("In state4_1: EWB_NSR_EWTR_NSTR_4_1\n");
+	if(CurrentMode == FIXED)
+	{
+		printf("Fixed SM>\tIn state4_1: EWB_NSR_EWTR_NSTR_4_1 (Ped. light blink)\n");
+	}
+	else if(CurrentMode == SENSOR)
+	{
+		printf("Sensor SM>\tIn state4_1: EWB_NSR_EWTR_NSTR_4_1 (Ped. light blink)\n");
+	}
 	startOneTimeTimer(timer_id, times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
@@ -91,7 +99,14 @@ void DoSomething10()
 }
 void DoSomething10_1()
 {
-	printf("In state10_1: EWR_NSB_EWTR_NSTR_10_1\n");
+	if(CurrentMode == FIXED)
+	{
+		printf("Fixed SM>\tIn state10_1: EWR_NSB_EWTR_NSTR_10_1 (Ped. light blink)\n");
+	}
+	else if(CurrentMode == SENSOR)
+	{
+		printf("Sensor SM>\tIn state10_1: EWR_NSB_EWTR_NSTR_10_1 (Ped. light blink)\n");
+	}
 	startOneTimeTimer(timer_id, times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
@@ -144,8 +159,8 @@ void initTimer()
 }
 void setTimerValues(struct Timervalues t)
 {
-	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
-			times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
+//	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
+//			times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
 	times.NSG_car 	= t.NSG_car;
 	times.NSB_ped 	= t.NSB_ped;
 	times.NSTG_car 	= t.NSTG_car;
@@ -161,6 +176,6 @@ void setTimerValues(struct Timervalues t)
 	times.EWTY_car	= t.EWTY_car;
 	times.EWR_clear = t.EWR_clear;
 	times.EWTR_clear= t.EWTR_clear;
-	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
-				times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
+//	printf("%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",times.NSG_car,times.NSB_ped,times.NSTG_car, times.NSY_car,times.NSTY_car,
+//			times.NSR_clear,times.NSTR_clear,times.EWG_car,times.EWB_ped,times.EWTG_car,times.EWY_car,times.EWTY_car,times.EWR_clear,times.EWTR_clear);
 }

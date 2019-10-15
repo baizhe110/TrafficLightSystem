@@ -63,7 +63,7 @@ void *ex_client(void *sname_data)
 	periodicTime.it_interval.tv_sec = (long) x;
 	periodicTime.it_interval.tv_nsec = (x - periodicTime.it_interval.tv_sec) * 1000000000L;
 
-	printf("%ld %ld\n", periodicTime.it_value.tv_sec, periodicTime.it_value.tv_nsec);
+//	printf("%ld %ld\n", periodicTime.it_value.tv_sec, periodicTime.it_value.tv_nsec);
 	timer_settime(periodicTimer_id, 0, &periodicTime, NULL);
 
 
@@ -197,14 +197,6 @@ void *ex_client(void *sname_data)
 		}
 
 		TrainApproachint = reply.TrainApproach;
-<<<<<<< HEAD
-
-=======
-		if(TrainApproachint==1)
-		{
-		printf("Train approaching, change to NSG\n");
-		}
->>>>>>> Train_Intersection_Interaction
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
 		//sleep(1);	// wait a few seconds before sending the next data packet
 	}

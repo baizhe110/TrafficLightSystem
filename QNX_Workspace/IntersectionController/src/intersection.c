@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL);
 	char val[100] = attachPoint;
 	//strcpy(val, QNET_ATTACH_POINT);
-	printf("val: %s \n", val);
+	//printf("The attachpoint is located in the following directory: %s \n", val);
 	pthread_t  th3_client;
 	pthread_create (&th3_client, NULL, ex_client, val);
 

@@ -39,7 +39,7 @@ void *keyboard(void *notused)
 		}
 		//strcpy(NewCarGlobal,NewCarKey);
 		pthread_mutex_unlock(&mutex);
-		printf("'%s'\n",&NewCarGlobal);
+//		printf("'%s'\n",&NewCarGlobal);
 	}
 }
 

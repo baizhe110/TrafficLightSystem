@@ -192,13 +192,13 @@ void *server()
 				if( Stay_alive == 0)
 				{
 					ConnectDetach(msg.hdr.scoid);
-					printf("\nServer was told to Detach from ClientID:%d ...\n", msg.ClientID);
+					printf("\nServer was told to Detach from ClientID:%s ...\n", msg.ClientID);
 					living = 0; // kill while loop
 					continue;
 				}
 				else
 				{
-					printf("\nServer received Detach pulse from ClientID:%d but rejected it ...\n", msg.ClientID);
+					printf("\nServer received Detach pulse from ClientID:%s but rejected it ...\n", msg.ClientID);
 				}
 				break;
 
@@ -310,7 +310,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	}
 	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("current node state '%d' from client (ID:%d)\n", msg->state, msg->ClientID);
+	printf("current node state '%d' from client (ID:%s)\n", msg->state, msg->ClientID);
 
 	fflush(stdout);
 

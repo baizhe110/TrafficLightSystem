@@ -272,7 +272,7 @@ void *sendCurrentState(void *notused){
 		pthread_mutex_unlock(&mutex);
 
 		// the data we are sending is in msg.data
-		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.state);
+//		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.state);
 		fflush(stdout);
 
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
@@ -298,7 +298,7 @@ void *sendCurrentState(void *notused){
 		}
 		else
 		{ // now process the reply
-			printf("   -->Reply is: '%s'\n", reply.buf);
+//			printf("   -->Reply is: '%s'\n", reply.buf);
 			mode = reply.mode;
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
