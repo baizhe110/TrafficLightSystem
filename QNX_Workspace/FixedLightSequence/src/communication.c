@@ -69,7 +69,8 @@ void *ex_client(void *sname_data)
 	char *sname = (char *)sname_data;
 	my_data msg;
 	my_reply reply;
-	msg.ClientID = 800; // unique number for this client (optional)
+	//msg.ClientID = 800; // unique number for this client (optional)
+	strcpy(msg.ClientID, "Intersection 1");
 	msg.type = intersectionType;
 
 	int server_coid;

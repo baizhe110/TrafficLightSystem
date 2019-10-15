@@ -235,7 +235,8 @@ void *sendCurrentState(void *notused){
 	my_data msg;
 	my_reply reply;
 
-	msg.ClientID = 700; // unique number for this client (optional)
+	//msg.ClientID = "BoomGate"; // unique number for this client (optional)
+	strcpy(msg.ClientID, "BoomGate");
 	msg.type = BoomGate;
 
 	int server_coid;
