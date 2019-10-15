@@ -37,6 +37,8 @@ int semOpen = 0;
 //for sending data in reply
 int replyDataType = 0;
 char replyData[100];
+int clientsAliveOld = 0;
+int clientsDeadOld = 0;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -285,15 +287,15 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 
 	if(clientType[msg->type]==BoomGate)
 	{
-	TrainApproachint = msg->TrainApproach;
-	if(TrainApproachint==1)
-	{
-		printf("Train approaching\n",TrainApproachint);
-	}
+		TrainApproachint = msg->TrainApproach;
+		if(TrainApproachint==1)
+		{
+			printf("Train approaching\n",TrainApproachint);
+		}
 	}
 	// put your message handling code here and assemble a reply message
 
-			// put your message handling code here and assemble a reply message
+	// put your message handling code here and assemble a reply message
 
 	// command mode to know what to do ex. tell slaves that every node is synched give node a name... to know if it is an train intersection
 
@@ -310,7 +312,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	}
 	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
-	printf("current node state '%d' from client (ID:%s)\n", msg->state, msg->ClientID);
+	printf("%s state received to be: '%d'\n", msg->ClientID, msg->state);
 
 	fflush(stdout);
 
@@ -437,7 +439,12 @@ void *ex_timerCheckAlive(void * val)
 				}
 			}
 		}
-		printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);
+		if(clientsAlive != clientsAliveOld || clientsDead != clientsDeadOld)
+		{
+			printf("clientsAlive: %d\t clientsDead: %d \n", clientsAlive, clientsDead);
+		}
+		clientsAliveOld = clientsAlive;
+		clientsDeadOld = clientsDead;
 	}
 	printf("Thread alive checking service has stopped.\n");
 	pthread_exit(EXIT_SUCCESS);
