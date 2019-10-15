@@ -26,7 +26,6 @@ int clientsDead = 0;
 int disattachPoint = 0; //for disattach message channel when shutdown central servewr
 struct timespec clientLastAlive[maxClients], startTime;
 int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
-int TrainApproachint = 0;
 
 TrainApproachint = 0;
 
