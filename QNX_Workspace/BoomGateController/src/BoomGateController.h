@@ -11,7 +11,8 @@ void *keyboard(void *notused);
 
 #define BUF_SIZE 100
 //#define QNET_ATTACH_POINT  "/net/GerardHost/dev/name/local/CentralServer"  // hostname using full path, change myname to the name used for server
-#define QNET_ATTACH_POINT "/net/VM_x86_Target02/dev/name/local/CentralServer"
+//#define QNET_ATTACH_POINT "/net/VM_x86_Target02/dev/name/local/CentralServer"
+#define QNET_ATTACH_POINT "/net/cycloneV_user/dev/name/local/CentralServer"
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
