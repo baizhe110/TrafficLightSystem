@@ -40,7 +40,10 @@ void *stateMachineThread()
 			CurrentState = SensorDrivenLightSequence( &CurrentState ); // pass address
 			break;
 		case SPECIAL:
-			CurrentState = EWR_NSR_EWTR_NSTG_7;
+			CurrentState = desiredState;
+			uint8_t	LCDdata[21] = {};
+			sprintf(LCDdata, "Special state %d", CurrentState);
+			print_Data_LCD(0,LCDdata);
 			printf("Special state> %d\t", CurrentState);
 			while(switchingMode == 0)
 			{

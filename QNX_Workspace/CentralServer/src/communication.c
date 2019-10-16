@@ -22,7 +22,7 @@ int currentMode[maxClients];
 int clientsAlive = 0;
 int clientsDead = 0;
 struct timespec clientLastAlive[maxClients], startTime;
-int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
+int clientStatus[maxClients], clientType[maxClients], clientState[maxClients], clientStateSpecial[maxClients];
 
 //for syncing
 sem_t *sem_sync;
@@ -83,6 +83,7 @@ void *keyboard(void *notused)
 				break;
 			case 3:
 				if (dataType == 1) {
+					// set mode of a type
 					pthread_mutex_lock(&mutex);
 					currentMode[type] = atoi(currentText);
 					pthread_mutex_unlock(&mutex);
@@ -98,10 +99,10 @@ void *keyboard(void *notused)
 				}
 				else if(dataType == 2)
 				{
+					//set timing for intersection
 					replyDataType = dataType;
 					strcpy(replyData, currentText);
 					printf("changing timing values\n");
-					//get timing for intersection
 				}
 				else if(dataType == 3)
 				{
@@ -109,6 +110,11 @@ void *keyboard(void *notused)
 				}
 
 				break;
+			case 4:
+				if(currentMode[type] == SPECIAL)
+				{
+					clientStateSpecial[type] = atoi(currentText);
+				}
 			default:
 				break;
 			}
@@ -259,6 +265,11 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		replymsg.data = replyDataType;
 		replyDataType = 0;
 		strcpy(replymsg.buf, replyData);
+		printf("Sending timing Values\n");
+	}
+	if (currentMode[msg->type] == SPECIAL)
+	{
+		replymsg.data = clientStateSpecial[msg->type];
 	}
 	replymsg.mode = currentMode[msg->type];
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
@@ -313,7 +324,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		}
 	}
 
-	sleep(1); // Delay the reply by a second (just for demonstration purposes)
+	//sleep(1); // Delay the reply by a second (just for demonstration purposes)
 
 	//printf("\n    -----> replying with: mode: '%d'\n",replymsg.mode);
 	MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));

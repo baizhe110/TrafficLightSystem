@@ -69,7 +69,7 @@ void *ex_client(void *sname_data)
 	char *sname = (char *)sname_data;
 	my_data msg;
 	my_reply reply;
-	msg.ClientID = 800; // unique number for this client (optional)
+	msg.ClientID = 801; // unique number for this client (optional)
 	msg.type = intersectionType;
 
 	int server_coid;
@@ -80,8 +80,10 @@ void *ex_client(void *sname_data)
 	while((server_coid = name_open(sname, 0)) == -1)
 	{
 		//printf("Could not connect to server!\n");
+		print_Data_LCD(1,"not connected");
 		sleep(1);
 	}
+	print_Data_LCD(1,"connected");
 
 	printf("Connection established to: %s\n", sname);
 
@@ -94,7 +96,7 @@ void *ex_client(void *sname_data)
 	{
 		// set up data packet
 		//msg.data=10+index;
-		msg.data=CurrentState;
+		msg.state=CurrentState;
 
 		// the data we are sending is in msg.data
 		//printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.data);
@@ -109,8 +111,15 @@ void *ex_client(void *sname_data)
 				while((server_coid = name_open(sname, 0)) == -1)
 				{
 					printf("Could not reconnect to server!\n");
+					print_Data_LCD(1,"not connected");
+					// switching to fixed sequence in case the connection gets lost and would be stuck in special sequence
+					if (CurrentMode > FIXED_SYNCED) {
+						switchingMode = 1;
+						desiredMode = FIXED;
+					}
 					sleep(1);
 				}
+				print_Data_LCD(1,"connected");
 				// continue with sending next pice of data to server
 				continue;
 			}
@@ -177,6 +186,9 @@ void *ex_client(void *sname_data)
 				{
 					switchingMode = 1;
 					desiredMode = reply.mode;
+					if (desiredMode == SPECIAL) {
+						desiredState = reply.data;
+					}
 					printf("Switching to Mode %d\n", desiredMode);
 					if (desiredMode == FIXED_SYNCED) {
 						if ((sem_sync = sem_open(attachPointSem, NULL)) == SEM_FAILED) {
