@@ -4,7 +4,8 @@
  * 				Includes:
  * 					1. StateTime state machine functions
  * 					2. Timer function: startOneTimeTimer. (Counter for the StateTime functions)
- * 					3.
+ * 					3. Timer initialization
+ * 					4. Set timer variables
  *********************************************************************/
 
 #include <stdio.h>

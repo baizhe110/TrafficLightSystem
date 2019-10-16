@@ -38,7 +38,7 @@ TrainApproachint = 0;
 /*********************************************************************
  * 					Client (Native message passing)
  *********************************************************************/
-void *ex_client(void *sname_data)
+void *ClientIntersection(void *sname_data)
 {
 	struct sigevent         event;
 	struct itimerspec       periodicTime;
