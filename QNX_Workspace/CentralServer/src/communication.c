@@ -23,12 +23,13 @@
 
 char *prognames = "timer_per1.c";
 int currentMode[maxClients];
-int stateOld;
+int stateOld[maxClients];
+int trainApproachOld;
 int clientsAlive = 0;
 int clientsDead = 0;
 int disattachPoint = 0; //for disattach message channel when shutdown central servewr
 struct timespec clientLastAlive[maxClients], startTime;
-int clientStatus[maxClients], clientType[maxClients], clientState[maxClients];
+int clientStatus[maxClients], clientType[maxClients], clientState[maxClients], clientStateSpecial[maxClients];
 
 TrainApproachint = 0;
 
@@ -128,6 +129,7 @@ void *keyboard(void *notused)
 				break;
 			case 3:
 				if (dataType == 1) {
+					// set mode of a type
 					pthread_mutex_lock(&mutex);
 					currentMode[type] = atoi(currentText);
 					pthread_mutex_unlock(&mutex);
@@ -143,10 +145,10 @@ void *keyboard(void *notused)
 				}
 				else if(dataType == 2)
 				{
+					//set timing for intersection
 					replyDataType = dataType;
 					strcpy(replyData, currentText);
 					printf("changing timing values\n");
-					//get timing for intersection
 				}
 				else if(dataType == 3)
 				{
@@ -154,6 +156,11 @@ void *keyboard(void *notused)
 				}
 
 				break;
+			case 4:
+				if(currentMode[type] == SPECIAL)
+				{
+					clientStateSpecial[type] = atoi(currentText);
+				}
 			default:
 				break;
 			}
@@ -328,10 +335,11 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	if(clientType[msg->type]==BoomGate)
 	{
 		TrainApproachint = msg->TrainApproach;
-		if(TrainApproachint==1)
+		if(TrainApproachint==1 && trainApproachOld != msg->TrainApproach)
 		{
 			printf("Train approaching\n",TrainApproachint);
 		}
+		trainApproachOld = TrainApproachint;
 	}
 	// put your message handling code here and assemble a reply message
 
@@ -349,21 +357,27 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		replymsg.data = replyDataType;
 		replyDataType = 0;
 		strcpy(replymsg.buf, replyData);
+		printf("Sending timing Values\n");
+	}
+	if (currentMode[msg->type] == SPECIAL)
+	{
+		replymsg.data = clientStateSpecial[msg->type];
 	}
 	replymsg.mode = currentMode[msg->type];
 
 	//sprintf(replymsg.buf, "Current Mode: %d", 1);
 
-	if(stateOld != msg->state)
+	if(stateOld[msg->type] != msg->state)
 	{
-	printf("%s> \t in state: '%d'\n", msg->ClientID, msg->state);
+		printf("%s> \t in state: '%d'\n", msg->ClientID, msg->state);
 	}
-	stateOld = msg->state;
+	stateOld[msg->type] = msg->state;
 
 	fflush(stdout);
 
 	if (synced == 0 && currentMode[msg->type] == FIXED_SYNCED) {
 		int syncClients = 0;
+		printf("semOpen val %d\n", semOpen);
 		if (semOpen == 0) {
 			printf("start Semaphore sync\n");
 			struct timespec now;
@@ -396,21 +410,30 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 			printf("Sync started for %d clients\n", value);
 			semOpen = 1;
 		}
-		int value= 10;
-		sem_getvalue(sem_sync, &value);
-		if (value==0) {
-			printf("Nodes sync completed\n");
-			currentMode[Intersection1] = FIXED;
-			currentMode[Intersection2] = FIXED;
-			synced = 1;
-			//sem_close(sem_sync);
-			sem_unlink("/sync");
-			semOpen = 0;
-		}
+
 	}
+	if (semOpen == 1) {
+		int value= 10;
+				sem_getvalue(sem_sync, &value);
+				if (value==0) {
+					printf("Nodes sync completed\n");
+					currentMode[Intersection1] = FIXED;
+					currentMode[Intersection2] = FIXED;
+					synced = 1;
+					//sem_close(sem_sync);
+					semOpen = 0;
+					printf("semOpen is now:%d\n", semOpen);
+					sem_unlink("/sync");
+
+				}
+	}
+
 
 	// Central Server replies to client
 	MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
+	if (currentMode[msg->type] == FIXED_SYNCED) {
+		currentMode[msg->type] = FIXED;
+	}
 	return 0;
 }
 

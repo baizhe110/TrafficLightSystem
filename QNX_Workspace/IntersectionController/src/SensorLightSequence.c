@@ -104,26 +104,31 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		{
 			printf("Car waiting, east west right turn\n");
 			CurState = EWR_NSR_EWTG_NSTR_1;
+			currentSensor=NO_input;
 		}
 		else if(currentSensor == EW_sensor)
 		{
 			printf("Car waiting, east west\n");
 			CurState = EWG_NSR_EWTR_NSTR_4;
+			currentSensor=NO_input;
 		}
 		else if(currentSensor == NST_sensor)
 		{
 			printf("Car waiting, north south right turn\n");
 			CurState = EWR_NSR_EWTR_NSTG_7;
+			currentSensor=NO_input;
 		}
 		else if(currentSensor == NS_sensor)
 		{
 			printf("Car waiting, north south\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
+			currentSensor=NO_input;
 		}
 		else
 		{
 			printf("No Cars waiting, east west green\n");
 			CurState = EWG_NSR_EWTR_NSTR_4;
+			currentSensor=NO_input;
 		}
 		break;
 
@@ -218,16 +223,19 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		{
 			printf("Car waiting, east west right turn\n");
 			CurState = EWR_NSR_EWTG_NSTR_1;
+			currentSensor=NO_input;
 		}
 		else if(currentSensor == NST_sensor)
 		{
 			printf("Car waiting, north south right turn\n");
 			CurState = EWR_NSR_EWTR_NSTG_7;
+			currentSensor=NO_input;
 		}
 		else if(currentSensor == NS_sensor)
 		{
 			printf("Car waiting, north south\n");
 			CurState = EWR_NSG_EWTR_NSTR_10;
+			currentSensor=NO_input;
 		}
 		break;
 	case EWR_NSR_EWTR_NSTG_7:

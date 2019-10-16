@@ -47,7 +47,7 @@ typedef union
 	// your other message structures would go here too
 } my_message_t;
 timer_t                 timer_id;
-int                     chid;
+//int                     chid;
 my_message_t            msg;
 int                     chid_Timer;
 int TrainApproachint = 0;
@@ -287,8 +287,8 @@ void *stateMachineThread()
 			}
 			else
 			{
-			printf("Special mode> \t");
-			CurrentState = BoomGateSequence( &CurrentState );
+				printf("Special mode> \t");
+				CurrentState = BoomGateSequence( &CurrentState );
 			}
 			break;
 		default:
@@ -308,6 +308,47 @@ void *ClientBoomGate(void *notused){
 
 
 	/********** Setup Stuff and error cheching **********/
+	// Timer Setup
+	struct sigevent         event;
+	struct itimerspec       periodicTime;
+	timer_t                 periodicTimer_id;
+	int                     chid;
+	chid = ChannelCreate(1); // Create a communications channel
+
+	//struct sigevent         event;
+	event.sigev_notify = SIGEV_PULSE;
+
+	// create a connection back to ourselves for the timer to send the pulse on
+	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid, _NTO_SIDE_CHANNEL, 0);
+	if (event.sigev_coid == -1)
+	{
+		//printf(stderr, "%s:  couldn't ConnectAttach to self!\n", prognames);
+		perror(NULL);
+		pthread_exit(EXIT_FAILURE);
+	}
+	struct sched_param th_param;
+	pthread_getschedparam(pthread_self(), NULL, &th_param);
+	event.sigev_priority = th_param.sched_curpriority;    // old QNX660 version getprio(0);
+	event.sigev_code = MY_PULSE_CODE;
+
+	// create the timer, binding it to the event
+	if (timer_create(CLOCK_REALTIME, &event, &periodicTimer_id) == -1)
+	{
+		//printf (stderr, "%s:  couldn't create a timer, errno %d\n", prognames, errno);
+		perror (NULL);
+		pthread_exit(EXIT_FAILURE);
+	}
+	// setup the timer
+	double x = 1;
+	x += 0.5e-9;
+	periodicTime.it_value.tv_sec = (long) x;
+	periodicTime.it_value.tv_nsec = (x - periodicTime.it_value.tv_sec) * 1000000000L;
+	periodicTime.it_interval.tv_sec = (long) x;
+	periodicTime.it_interval.tv_nsec = (x - periodicTime.it_interval.tv_sec) * 1000000000L;
+
+	//	printf("%ld %ld\n", periodicTime.it_value.tv_sec, periodicTime.it_value.tv_nsec);
+	timer_settime(periodicTimer_id, 0, &periodicTime, NULL);
+
 
 	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
 
