@@ -38,7 +38,7 @@ void *stateMachineThread()
 	{
 		if(TrainApproachint==1)
 		{
-			printf("State machine nows that train approaching\n");
+			printf("State machine knows that train approaching\n");
 		}
 		switch (CurrentMode) {
 		case FIXED:

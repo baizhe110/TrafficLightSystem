@@ -55,7 +55,8 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 						sem_getvalue(sem_sync, &semValue);
 					}
 					printf("Successfully synced with all clients\n");
-					//CurrentMode = FIXED;
+					CurrentMode = FIXED;
+					desiredMode = FIXED;
 					sem_close(sem_sync);
 				}
 				syncing = 0;

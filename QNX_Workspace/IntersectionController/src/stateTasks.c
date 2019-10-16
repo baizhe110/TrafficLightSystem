@@ -261,7 +261,7 @@ int  I2cWrite_(int fd, uint8_t Address, uint8_t mode, uint8_t *pBuffer, uint32_t
 	status = devctlv(fd, 		  DCMD_I2C_SEND, 2,          0,          sv,              NULL,           NULL);
 
 	if (status != EOK)
-		printf("status = %s\n", strerror ( status ));
+		//printf("status = %s\n", strerror ( status ));
 
 	return status;
 }
@@ -298,7 +298,7 @@ void Initialise_LCD (int fd, _Uint32t LCDi2cAdd2)
 	if (error)
 	{
 		fprintf(stderr, "Error setting the bus speed: %d\n",strerror ( error ));
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 	else
 		printf("Bus speed set = %d\n", speed);
