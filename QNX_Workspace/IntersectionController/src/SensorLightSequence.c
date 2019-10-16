@@ -49,11 +49,19 @@ void *keyboard(void *notused)
 		{
 			currentSensor = EW_sensor;
 		}
+		else if(strcmp("ewp",NewCarKey) == 0)
+		{
+			currentSensor = EW_sensor;
+		}
 		else if(strcmp("nst",NewCarKey) == 0)
 		{
 			currentSensor = NST_sensor;
 		}
 		else if(strcmp("ns",NewCarKey) == 0)
+		{
+			currentSensor = NS_sensor;
+		}
+		else if(strcmp("nsp",NewCarKey) == 0)
 		{
 			currentSensor = NS_sensor;
 		}
