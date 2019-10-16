@@ -12,7 +12,7 @@
 #define BUF_SIZE 100
 #define MY_PULSE_CODE   _PULSE_CODE_MINAVAIL
 
-void *ex_client(void *sname_data);
+void *ClientIntersection(void *sname_data);
 
 typedef struct
 {

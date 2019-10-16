@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL); // Starting up the state machine for the intersection
 
 	char val[100] = attachPoint; 								// Setting the attachpoint directory in a character string
-	pthread_create (&th3_client, NULL, ex_client, val); 		// Starting up the client to communicated between intersection and centralserver
+	pthread_create (&th3_client, NULL, ClientIntersection, val); 		// Starting up the client to communicated between intersection and centralserver
 
 	pthread_join(stateMachine,NULL);							// Waiting here until the state machine thread is complete (But never happens)
 }
