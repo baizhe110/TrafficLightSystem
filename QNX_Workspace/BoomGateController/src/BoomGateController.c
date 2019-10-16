@@ -3,7 +3,14 @@
  *
  * 				Includes:
  * 					1. Set timer values
- * 					2. MAIN (For boom gate controller)
+ * 					2. Initialization of timer
+ * 					3. Timer function that counts
+ * 					4. StateTime functions
+ * 					5. Keyboard input function
+ * 					6. State machine
+ * 					7. State machine (main)
+ * 					8. Client (Native message passing)
+ * 					9. MAIN (For boom gate controller)
  *********************************************************************/
 
 
@@ -47,7 +54,6 @@ int TrainApproachint = 0;
 
 // timer variables
 struct itimerspec itime1;
-
 struct Timervalues times;
 
 
@@ -71,6 +77,59 @@ void setTimerValues()
 
 
 
+/*********************************************************************
+ *	Initialization of timer for Statetime functions
+ *********************************************************************/
+void initTimer()
+{
+	chid_Timer= ChannelCreate(0); // Create a communications channel
+
+	struct sigevent         event;
+	event.sigev_notify = SIGEV_PULSE;
+
+	// create a connection back to ourselves for the timer to send the pulse on
+	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid_Timer, _NTO_SIDE_CHANNEL, 0);
+	if (event.sigev_coid == -1)
+	{
+		printf(stderr, "%s:  couldn't ConnectAttach to self!\n", progname);
+		perror(NULL);
+		exit(EXIT_FAILURE);
+	}
+	struct sched_param th_param;
+	pthread_getschedparam(pthread_self(), NULL, &th_param);
+	event.sigev_priority = th_param.sched_curpriority;
+	event.sigev_code = MY_PULSE_CODE;
+
+	// create the timer, binding it to the event
+	if (timer_create(CLOCK_REALTIME, &event, &timer_id) == -1)
+	{
+		printf (stderr, "%s:  couldn't create a timer, errno %d\n", progname, errno);
+		perror (NULL);
+		exit (EXIT_FAILURE);
+	}
+}
+
+
+
+
+
+/*********************************************************************
+ *	Timer that counts for the specified input time (Used for the StateTime functions)
+ *********************************************************************/
+void startOneTimeTimer(timer_t timerID, double time)
+{
+	double x = time;
+	x += 0.5e-9;
+	itime1.it_value.tv_sec = (long) x;
+	itime1.it_value.tv_nsec = (x - itime1.it_value.tv_sec) * 1000000000L;
+	timer_settime(timerID, 0, &itime1, NULL);
+}
+
+
+
+
+
+
 
 /*********************************************************************
  *	StateTime functions for the state machine
@@ -79,7 +138,6 @@ void StateTime0()
 {
 	printf("In state0: NoTrain_0\n");
 	startOneTimeTimer(timer_id, times.NoTrain);
-	//timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid_Timer, &msg, sizeof(msg), NULL);
 }
 void StateTime1()
@@ -119,58 +177,6 @@ void StateTime5()
 
 
 
-/*********************************************************************
- *	Timer that counts for the specified input time (Used for the StateTime functions)
- *********************************************************************/
-void startOneTimeTimer(timer_t timerID, double time)
-{
-	double x = time;
-	x += 0.5e-9;
-	itime1.it_value.tv_sec = (long) x;
-	itime1.it_value.tv_nsec = (x - itime1.it_value.tv_sec) * 1000000000L;
-	timer_settime(timerID, 0, &itime1, NULL);
-}
-
-
-
-
-
-
-
-/*********************************************************************
- *	Initialization of timer
- *********************************************************************/
-void initTimer()
-{
-	chid_Timer= ChannelCreate(0); // Create a communications channel
-
-	struct sigevent         event;
-	event.sigev_notify = SIGEV_PULSE;
-
-	// create a connection back to ourselves for the timer to send the pulse on
-	event.sigev_coid = ConnectAttach(ND_LOCAL_NODE, 0, chid_Timer, _NTO_SIDE_CHANNEL, 0);
-	if (event.sigev_coid == -1)
-	{
-		printf(stderr, "%s:  couldn't ConnectAttach to self!\n", progname);
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
-	struct sched_param th_param;
-	pthread_getschedparam(pthread_self(), NULL, &th_param);
-	event.sigev_priority = th_param.sched_curpriority;    // old QNX660 version getprio(0);
-	event.sigev_code = MY_PULSE_CODE;
-
-	// create the timer, binding it to the event
-	if (timer_create(CLOCK_REALTIME, &event, &timer_id) == -1)
-	{
-		printf (stderr, "%s:  couldn't create a timer, errno %d\n", progname, errno);
-		perror (NULL);
-		exit (EXIT_FAILURE);
-	}
-}
-
-
-
 
 
 /*********************************************************************
@@ -205,7 +211,7 @@ enum states BoomGateSequence(void *CurrentState)
 	switch (CurState){
 	case NoTrain_0:
 		StateTime0();
-		while(CurState == NoTrain_0){
+		while(CurState == NoTrain_0 && CurrentMode == NORMAL){
 			pthread_mutex_lock(&mutex);
 			strcpy(NewTrainReceive,NewTrainGlobal);
 			strcpy(NewTrainGlobal,"aaa");
@@ -235,6 +241,9 @@ enum states BoomGateSequence(void *CurrentState)
 		break;
 	case TrainCrossing_3:
 		StateTime3();
+		while(CurrentMode == SPECIAL)
+		{
+		}
 		CurState = TrainLeaving_4;
 		break;
 	case TrainLeaving_4:
@@ -269,10 +278,18 @@ void *stateMachineThread()
 		switch (CurrentMode) {
 		case NORMAL:
 			printf("Normal Sequence> \t");
-			CurrentState = BoomGateSequence( &CurrentState ); // pass address
+			CurrentState = BoomGateSequence( &CurrentState );
 			break;
 		case SPECIAL:
-			CurrentState = TrainCrossing_3; // Example for setting manually special state.
+			if (CurrentState == NoTrain_0)
+			{
+				CurrentState = TrainApproaching_1;
+			}
+			else
+			{
+			printf("Special mode> \t");
+			CurrentState = BoomGateSequence( &CurrentState );
+			}
 			break;
 		default:
 			break;
@@ -289,16 +306,18 @@ void *stateMachineThread()
  *********************************************************************/
 void *ClientBoomGate(void *notused){
 
-	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
-	my_data msg;
-	my_reply reply;
 
-	//msg.ClientID = "BoomGate"; // unique number for this client (optional)
+	/********** Setup Stuff and error cheching **********/
+
+	//char *sname = "/net/VM_x86_Target02/dev/name/local/CentralServer";
+
+	my_data msg;		// Data send to server
+	my_reply reply;		// Data received from server
+
 	strcpy(msg.ClientID, "BoomGate");
 	msg.type = BoomGate;
 
 	int server_coid;
-	int index = 0;
 
 	printf("\n");
 	printf("  ---> Trying to connect to server named: %s\n", QNET_ATTACH_POINT);
@@ -306,7 +325,7 @@ void *ClientBoomGate(void *notused){
 
 	while((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
 	{
-		//printf("Could not connect to server!\n");
+		printf("Could not connect to server!\n");
 		sleep(1);
 	}
 
@@ -318,20 +337,30 @@ void *ClientBoomGate(void *notused){
 	msg.hdr.type = 0x00;
 	msg.hdr.subtype = 0x00;
 
-	// Do whatever work you wanted with server connection
+
+
+
+	/*********************************************************************
+	 *				Here we send and receive data to and from the server
+	 *			Data sent:
+	 *				1. CurrentState send through msg.state
+	 *				2. If train is approaching, set in msg.TrainApproach
+	 *			Data received:
+	 *				1. CurrentMode received in reply.mode
+	 *********************************************************************/
 	while (1) // send data packets
 	{
-		// set up data packet
-		//msg.data=10+index;
+
 		msg.state=CurrentState;
 		pthread_mutex_lock(&mutex);
 		msg.TrainApproach = TrainApproachint;
 		pthread_mutex_unlock(&mutex);
 
-		// the data we are sending is in msg.data
-//		printf("Client (ID:%d), sending data packet with the integer value: %d \n", msg.ClientID, msg.state);
+
 		fflush(stdout);
 
+
+		/******** Here we send data, and check for errors. *********/
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
 		{
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
@@ -353,19 +382,18 @@ void *ClientBoomGate(void *notused){
 			// maybe we did not get a reply from the server
 			break;
 		}
+
+		/******* Here we received the data from the server ******/
 		else
-		{ // now process the reply
-//			printf("   -->Reply is: '%s'\n", reply.buf);
+		{
 			CurrentMode = reply.mode;
 		}
 		MsgReceive(chid, &msg, sizeof(msg), NULL);
-		sleep(2);	// wait a few seconds before sending the next data packet
 	}
 
 	// Close the connection
 	printf("\n Sending message to server to tell it to close the connection\n");
 	name_close(server_coid);
-
 }
 
 

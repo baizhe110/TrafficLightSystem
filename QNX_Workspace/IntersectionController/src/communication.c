@@ -70,7 +70,7 @@ void *ex_client(void *sname_data)
 		pthread_exit(EXIT_FAILURE);
 	}
 	// setup the timer
-	double x = 2;
+	double x = 1;
 	x += 0.5e-9;
 	periodicTime.it_value.tv_sec = (long) x;
 	periodicTime.it_value.tv_nsec = (x - periodicTime.it_value.tv_sec) * 1000000000L;

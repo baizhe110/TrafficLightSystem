@@ -17,7 +17,7 @@ enum INTERSECTION_TYPE {
 
 change the timing: 	intersection1;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
 change the mode:	intersection1;1;1
-change the mode of boomgate: boom;1;0
+change the mode of boomgate: boom;1;1
 */
 #define attachPoint "/net/VM_x86_Target02/dev/name/local/CentralServer"
 //#define attachPoint "/net/EA42e8b8/dev/name/local/CentralServer"

@@ -39,7 +39,7 @@ int TrainApproachint;
 void *keyboard(void *notused);
 void *server();
 void *handleServerMessages(void *rcvid_passed, void *msg_passed);
-void *ex_timerCheckAlive(void * val);
+void *timerCheckAlive(void * val);
 
 enum intersection_modes {
 	FIXED,

@@ -1,7 +1,6 @@
-/*
- * BoomGateSequence.h
- *
- */
+/*********************************************************************
+ *					BOOMGATE CONTROLLER HEADER FILE
+ *********************************************************************/
 
 #ifndef SRC_BOOMGATESEQUENCE_H_
 #define SRC_BOOMGATESEQUENCE_H_
@@ -32,11 +31,7 @@ enum INTERSECTION_TYPE {
 	BoomGate,
 };
 
-//enum substates {
-//	INTERSECTION_NORMAL,
-//	EWB_NSR_EWTR_NSTR_4_1,
-//	EWR_NSB_EWTR_NSTR_10_1
-//};
+
 typedef struct
 {
 	struct _pulse hdr; // Our real data comes after this header
@@ -46,6 +41,7 @@ typedef struct
 	int state;
 	int TrainApproach;
 } my_data;
+
 typedef struct
 {
 	struct _pulse hdr;  // Our real data comes after this header
@@ -53,6 +49,7 @@ typedef struct
 	int data;
 	int mode;
 } my_reply;
+
 struct Timervalues{
 	double NoTrain;
 	double TrainApproaching1;

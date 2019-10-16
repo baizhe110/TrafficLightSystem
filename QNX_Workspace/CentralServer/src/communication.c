@@ -1,9 +1,11 @@
-/*
- * communication.c
+/*********************************************************************
+ *					CENTRAL SERVER COMMUNICATION
  *
- *  Created on: 4 Oct 2019
- *      Author: bruno
- */
+ * 				Includes:
+ * 					1. Keyboard input
+ * 					2.
+ *********************************************************************/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -44,7 +46,34 @@ int clientsDeadOld = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
-///////////////////////////////////////// Keyboard input
+/*********************************************************************
+ *			KEYBOARD INPUT FOR CHANGING MODES ETC
+ *			Keyboard inputs:
+ *			Input is one long line of code, separated by ;
+ *			First you choose what node to talk to (or directly to special or stop)
+ *			Second you choose which datatype you send: mode or timings
+ *			Third you specify the mode or timing
+ *					1. Changing boom gate mode to SPECIAL:
+ *								1. boom;1;1
+ *					2. Changing boom gate mode to NORMAL:
+ *								2. boom;1;0
+ *					3. Changing intersection mode to SENSOR:
+ *								1. intersection1;1;1
+ *								2. intersection2;1;1
+ *					4. Changing intersection mode to FIXED:
+ *								1. intersection1;1;0
+ *								2. intersection2;1;0
+ *					5. Changing intersection mode to SPECIAL:
+ *								1. intersection1;1;2
+ *								2. intersection2;1;2
+ *					6. Changing intersection mode to FIXED_SYNC:
+ *								1. intersection1;1;3
+ *								2. intersection2;1;3
+ *					7. Changing timings of intersection lights:
+ *								1. intersection1;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
+ *					8. Stopping the server, ensuring proper detach of the server
+ *								1. stop
+ *********************************************************************/
 void *keyboard(void *notused)
 {
 	char newInput[100], currentText[100];
@@ -132,7 +161,9 @@ void *keyboard(void *notused)
 	}
 }
 
-/////////////////////////////////////////// Server code
+/*********************************************************************
+ * 					SERVER (Native message passing)
+ *********************************************************************/
 void *server()
 {
 	struct sigevent         timeOutEvent;
@@ -269,7 +300,15 @@ void *server()
 	pthread_exit(EXIT_SUCCESS);
 }
 
-/////////////////////////////////////////////////////////////////////// Handle Server received Messages
+
+
+
+
+/*********************************************************************
+ * 						Handle server message
+ * 				Here the data from the clients is processed
+ * 				As well here data is send to the clients
+ *********************************************************************/
 void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 {
 	my_data *msg = (my_data *)msg_passed;
@@ -370,23 +409,29 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 		}
 	}
 
-//	usleep(100000); // Delay the reply by a second (just for demonstration purposes)
-
-	//printf("\n    -----> replying with: mode: '%d'\n",replymsg.mode);
+	// Central Server replies to client
 	MsgReply(rcvid, EOK, &replymsg, sizeof(replymsg));
-
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////// check for alive clients
-void *ex_timerCheckAlive(void * val)
+
+
+
+
+
+
+/*********************************************************************
+ * 				Checking if clients are alive (Fault tolerant)
+ *********************************************************************/
+void *timerCheckAlive(void * val)
 {
+
+	//Defining variables and create communication channel
 	struct sigevent         event;
 	struct itimerspec       periodicTime;
 	timer_t                 periodicTimer_id;
 	int                     chid;
 	chid = ChannelCreate(0); // Create a communications channel
-
 	//struct sigevent         event;
 	event.sigev_notify = SIGEV_PULSE;
 
@@ -422,6 +467,10 @@ void *ex_timerCheckAlive(void * val)
 	timer_settime(periodicTimer_id, 0, &periodicTime, NULL);
 
 	struct timespec now;
+
+
+
+	//Here we check what clients are alive or dead. This depends on a 3 second
 	// while checking loop
 	while(!disattachPoint) //using disattachPoint signal as flag
 	{
