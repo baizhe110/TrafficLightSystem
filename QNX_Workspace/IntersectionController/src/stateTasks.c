@@ -75,6 +75,7 @@ void StateTime4()
 }
 void StateTime4_1()
 {
+	CurSubstate = EWB_NSR_EWTR_NSTR_4_1;
 	if(CurrentMode == FIXED)
 	{
 		printf("Fixed SM>\tIn state4_1: EWB_NSR_EWTR_NSTR_4_1 (Ped. light blink)\n");
@@ -85,6 +86,7 @@ void StateTime4_1()
 	}
 	startOneTimeTimer(timer_id, times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
+	CurSubstate = INTERSECTION_NORMAL;
 }
 void StateTime5()
 {
@@ -130,6 +132,7 @@ void StateTime10()
 }
 void StateTime10_1()
 {
+	CurSubstate = EWR_NSB_EWTR_NSTR_10_1;
 	if(CurrentMode == FIXED)
 	{
 		printf("Fixed SM>\tIn state10_1: EWR_NSB_EWTR_NSTR_10_1 (Ped. light blink)\n");
@@ -140,6 +143,7 @@ void StateTime10_1()
 	}
 	startOneTimeTimer(timer_id, times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
+	CurSubstate = INTERSECTION_NORMAL;
 }
 void StateTime11()
 {

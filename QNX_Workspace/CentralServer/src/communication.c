@@ -40,6 +40,7 @@ int synced = 0;
 int semOpen = 0;
 //for sending data in reply
 int replyDataType = 0;
+int replyDataIntersectionType = 0;
 char replyData[100];
 int clientsAliveOld = 0;
 int clientsDeadOld = 0;
@@ -146,6 +147,7 @@ void *keyboard(void *notused)
 				else if(dataType == 2)
 				{
 					//set timing for intersection
+					replyDataIntersectionType = type;
 					replyDataType = dataType;
 					strcpy(replyData, currentText);
 					printf("changing timing values\n");
@@ -352,7 +354,7 @@ void *handleServerMessages(void *rcvid_passed, void *msg_passed)
 	replymsg.TrainApproach = TrainApproachint;
 
 	// send timer values data
-	if(replyDataType == 2)
+	if(replyDataType == 2 && replyDataIntersectionType == msg->type)
 	{
 		replymsg.data = replyDataType;
 		replyDataType = 0;
@@ -507,7 +509,7 @@ void *timerCheckAlive(void * val)
 		clientsDead = 0;
 		for (int i = 0; i < maxClients; ++i) {
 			if (clientLastAlive[i].tv_sec > startTime.tv_sec ) {
-				if ((now.tv_sec - clientLastAlive[i].tv_sec) < 5) {
+				if ((now.tv_sec - clientLastAlive[i].tv_sec) < 3) {
 					clientsAlive++;
 					clientStatus[i] = 1;
 				}

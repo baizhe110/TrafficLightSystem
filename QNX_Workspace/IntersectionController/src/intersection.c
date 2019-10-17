@@ -13,6 +13,7 @@
 #include "SensorLightSequence.h"
 #include "stateTasks.h"
 #include "communication.h"
+#include "display.h"
 #include <sys/dispatch.h>
 #include <fcntl.h>
 #include <share.h>
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
 {
 
 	//Declaring threads
-	pthread_t stateMachine, keyboarInput, th3_client;
+	pthread_t stateMachine, keyboarInput, th3_client, de10display;
 
 
 	//Initialize variables, specifying what mode to start up in
@@ -108,19 +109,19 @@ int main(int argc, char *argv[])
 
 	initTimer(); 					//Initialization
 	struct Timervalues t;
-	t.NSG_car 	= 4;
+	t.NSG_car 	= 5;
 	t.NSB_ped 	= 1;
 	t.NSTG_car 	= 4;
-	t.NSY_car 	= 2;
-	t.NSTY_car 	= 2;
+	t.NSY_car 	= 1;
+	t.NSTY_car 	= 1;
 	t.NSR_clear	= 1;
 	t.NSTR_clear= 1;
 									// Setting the initial timings for the lights
-	t.EWG_car	= 4;
+	t.EWG_car	= 5;
 	t.EWB_ped	= 1;
 	t.EWTG_car	= 4;
-	t.EWY_car	= 2;
-	t.EWTY_car	= 2;
+	t.EWY_car	= 1;
+	t.EWTY_car	= 1;
 	t.EWR_clear = 1;
 	t.EWTR_clear= 1;
 	setTimerValues(t); 				// Calling/sending timings to the function that sets the timer values
@@ -128,6 +129,11 @@ int main(int argc, char *argv[])
 
 
 	// Starting up threads
+	if(intersectionType == Intersection1)
+	{
+	pthread_create(&de10display, NULL, updateIntersection, NULL);
+	}
+
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);  		// Keyboard input, simulating cars and pedestrians in sensor mode
 	pthread_create(&stateMachine,NULL,stateMachineThread,NULL); // Starting up the state machine for the intersection
 

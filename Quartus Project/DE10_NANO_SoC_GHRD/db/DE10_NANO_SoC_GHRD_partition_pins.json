@@ -1,0 +1,221 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "LED[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[1]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[2]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[3]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[4]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[5]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[6]",
+					"strict" : false
+				},
+				{
+					"name" : "LED[7]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[7]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[8]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[9]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[10]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[11]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[12]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[13]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[14]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[15]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[16]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[17]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[18]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[19]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[20]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[21]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[22]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[23]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[24]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[25]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[26]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[27]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[28]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[29]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[30]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_out[31]",
+					"strict" : false
+				},
+				{
+					"name" : "FPGA_CLK1_50",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[0]",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[1]",
+					"strict" : false
+				},
+				{
+					"name" : "SW[2]",
+					"strict" : false
+				},
+				{
+					"name" : "SW[3]",
+					"strict" : false
+				},
+				{
+					"name" : "SW[0]",
+					"strict" : false
+				},
+				{
+					"name" : "SW[1]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[5]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[4]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[3]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[2]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[1]",
+					"strict" : false
+				},
+				{
+					"name" : "GPIO0_in[0]",
+					"strict" : false
+				}
+			]
+		}
+	]
+}
