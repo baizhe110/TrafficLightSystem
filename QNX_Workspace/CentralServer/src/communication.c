@@ -71,11 +71,18 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
  *					6. Changing intersection mode to SPECIAL:
  *								1. intersection1;1;3;4
  *								2. intersection2;1;3;10
+ *					5. Changing intersection mode to SPECIAL:
+ *								1. intersection1;1;3;0
+ *								2. intersection2;1;3;0
+ *					6. Changing intersection mode to FIXED_SYNC:
+ *								1. intersection1;1;2
+ *								2. intersection2;1;2
  *					7. Changing timings of intersection lights:
  *								1. intersection1;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
  *					8. Stopping the server, ensuring proper detach of the server
  *								1. stop
  *********************************************************************/
+
 void *keyboard(void *notused)
 {
 	char newInput[100], currentText[100];
