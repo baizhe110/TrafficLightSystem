@@ -15,7 +15,6 @@
 #include "stateTasks.h"
 #include "SensorLightSequence.h"
 
-
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;  // needs to be set to PTHREAD_MUTEX_INITIALIZER;
 
 char NewCarGlobal[3]="aaa";   // Declaring the global variable used for keyboard input
@@ -95,7 +94,7 @@ enum states SensorDrivenLightSequence(void *CurrentState)
 		StateTime0();
 
 		if (switchingMode == 1) {
-			CurrentMode = desiredMode;
+			CurrentMode = FIXED;
 			break;
 		}
 

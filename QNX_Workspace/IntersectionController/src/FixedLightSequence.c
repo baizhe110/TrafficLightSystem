@@ -26,7 +26,7 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 		printf("Mode switched\n");
 		printf("Fixed SM> \t");
 		switchingMode = 0;
-		CurState = EWR_NSR_EWTR_NSTR_0;
+		//CurState = EWR_NSR_EWTR_NSTR_0;
 	}
 
 	switch (CurState)
@@ -65,6 +65,8 @@ enum states SingleStep_TrafficLight_SM(void *CurrentState)
 				// if takes more than xxx time to manually
 
 			}
+			switchingMode = 0;
+			break;
 		}
 		CurState = EWR_NSR_EWTG_NSTR_1;
 		break;

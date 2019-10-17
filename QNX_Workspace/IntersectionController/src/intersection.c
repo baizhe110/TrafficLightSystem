@@ -37,6 +37,10 @@ void *stateMachineThread()
 
 	while (1)
 	{
+		if (switchingMode == 1) {
+			CurrentMode = FIXED;
+			printf("Changing mode...\t");
+		}
 		if(TrainApproachint==1)
 		{
 			printf("State machine knows that train approaching\n");
@@ -51,8 +55,11 @@ void *stateMachineThread()
 			CurrentState = SensorDrivenLightSequence( &CurrentState ); // pass address
 			break;
 		case SPECIAL:
-			CurrentState = EWR_NSR_EWTR_NSTG_7;
-			printf("Special state> %d\t", CurrentState);
+			CurrentState = desiredState;
+			uint8_t	LCDdata[21] = {};
+			sprintf(LCDdata, "Special state %d", CurrentState);
+			print_Data_LCD(0,LCDdata);
+			printf("Special state> %d\n", CurrentState);
 			while(switchingMode == 0)
 			{
 			}
@@ -116,7 +123,7 @@ int main(int argc, char *argv[])
 	t.NSTY_car 	= 1;
 	t.NSR_clear	= 1;
 	t.NSTR_clear= 1;
-									// Setting the initial timings for the lights
+	// Setting the initial timings for the lights
 	t.EWG_car	= 5;
 	t.EWB_ped	= 1;
 	t.EWTG_car	= 4;
@@ -131,7 +138,7 @@ int main(int argc, char *argv[])
 	// Starting up threads
 	if(intersectionType == Intersection1)
 	{
-	pthread_create(&de10display, NULL, updateIntersection, NULL);
+		pthread_create(&de10display, NULL, updateIntersection, NULL);
 	}
 
 	pthread_create(&keyboarInput, NULL, keyboard, NULL);  		// Keyboard input, simulating cars and pedestrians in sensor mode

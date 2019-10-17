@@ -8,8 +8,10 @@
 #ifndef SRC_SENSORLIGHTSEQUENCE_H_
 #define SRC_SENSORLIGHTSEQUENCE_H_
 
+
 enum states SensorDrivenLightSequence(void *CurrentState);
 
 void *keyboard(void *notused);
+
 
 #endif /* SRC_SENSORLIGHTSEQUENCE_H_ */

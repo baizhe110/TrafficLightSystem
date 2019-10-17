@@ -37,44 +37,45 @@ char *progname = "timer_per1.c"; 		//Pointer for timer
  *********************************************************************/
 void StateTime0()
 {
+	startOneTimeTimer(timer_id, times.NSR_clear);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTR_0");
 	printf("In state0: EWR_NSR_EWTR_NSTR_0\n");
-	startOneTimeTimer(timer_id, times.NSR_clear);
 	//timer_settime(timer_id, 0, &itime1, NULL);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime1()
 {
+	startOneTimeTimer(timer_id, times.EWTG_car);
 	print_Data_LCD(0,"EWR_NSR_EWTG_NSTR_1");
 	printf("In state1: EWR_NSR_EWTG_NSTR_1\n");
-	startOneTimeTimer(timer_id, times.EWTG_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime2()
 {
+	startOneTimeTimer(timer_id, times.EWTY_car);
 	print_Data_LCD(0,"EWR_NSR_EWTY_NSTR_2");
 	printf("In state2: EWR_NSR_EWTY_NSTR_2\n");
-	startOneTimeTimer(timer_id, times.EWTY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 
 }
 void StateTime3()
 {
+	startOneTimeTimer(timer_id, times.EWTR_clear);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTR_3");
 	printf("In state3: EWR_NSR_EWTR_NSTR_3\n");
-	startOneTimeTimer(timer_id, times.EWTR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime4()
 {
+	startOneTimeTimer(timer_id, times.EWG_car-times.EWB_ped);
 	print_Data_LCD(0,"EWG_NSR_EWTR_NSTR_4");
 	printf("In state4: EWG_NSR_EWTR_NSTR_4\n");
-	startOneTimeTimer(timer_id, times.EWG_car-times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 
 }
 void StateTime4_1()
 {
+	startOneTimeTimer(timer_id, times.EWB_ped);
 	CurSubstate = EWB_NSR_EWTR_NSTR_4_1;
 	if(CurrentMode == FIXED)
 	{
@@ -84,54 +85,54 @@ void StateTime4_1()
 	{
 		printf("Sensor SM>\tIn state4_1: EWB_NSR_EWTR_NSTR_4_1 (Ped. light blink)\n");
 	}
-	startOneTimeTimer(timer_id, times.EWB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 	CurSubstate = INTERSECTION_NORMAL;
 }
 void StateTime5()
 {
+	startOneTimeTimer(timer_id, times.EWY_car);
 	print_Data_LCD(0,"EWY_NSR_EWTR_NSTR_5");
 	printf("In state5: EWY_NSR_EWTR_NSTR_5\n");
-	startOneTimeTimer(timer_id, times.EWY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime6()
 {
+	startOneTimeTimer(timer_id, times.EWR_clear);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTR_6");
 	printf("In state6: EWR_NSR_EWTR_NSTR_6\n");
-	startOneTimeTimer(timer_id, times.EWR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime7()
 {
+	startOneTimeTimer(timer_id, times.NSTG_car);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTG_7");
 	printf("In state7: EWR_NSR_EWTR_NSTG_7\n");
-	startOneTimeTimer(timer_id, times.NSTG_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime8()
 {
+	startOneTimeTimer(timer_id, times.NSTY_car);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTY_8");
 	printf("In state8: EWR_NSR_EWTR_NSTY_8\n");
-	startOneTimeTimer(timer_id, times.NSTY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime9()
 {
+	startOneTimeTimer(timer_id, times.NSTR_clear);
 	print_Data_LCD(0,"EWR_NSR_EWTR_NSTR_9");
 	printf("In state9: EWR_NSR_EWTR_NSTR_9\n");
-	startOneTimeTimer(timer_id, times.NSTR_clear);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime10()
 {
+	startOneTimeTimer(timer_id, times.NSG_car-times.NSB_ped);
 	print_Data_LCD(0,"EWR_NSG_EWTR_NSTR_10");
 	printf("In state10: EWR_NSG_EWTR_NSTR_10\n");
-	startOneTimeTimer(timer_id, times.NSG_car-times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 void StateTime10_1()
 {
+	startOneTimeTimer(timer_id, times.NSB_ped);
 	CurSubstate = EWR_NSB_EWTR_NSTR_10_1;
 	if(CurrentMode == FIXED)
 	{
@@ -141,15 +142,14 @@ void StateTime10_1()
 	{
 		printf("Sensor SM>\tIn state10_1: EWR_NSB_EWTR_NSTR_10_1 (Ped. light blink)\n");
 	}
-	startOneTimeTimer(timer_id, times.NSB_ped);
 	MsgReceive(chid, NULL, NULL, NULL);
 	CurSubstate = INTERSECTION_NORMAL;
 }
 void StateTime11()
 {
+	startOneTimeTimer(timer_id, times.NSY_car);
 	print_Data_LCD(0,"EWR_NSY_EWTR_NSTR_11");
 	printf("In state11: EWR_NSY_EWTR_NSTR_11\n");
-	startOneTimeTimer(timer_id, times.NSY_car);
 	MsgReceive(chid, NULL, NULL, NULL);
 }
 

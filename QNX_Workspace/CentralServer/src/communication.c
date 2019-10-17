@@ -65,12 +65,12 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
  *					4. Changing intersection mode to FIXED:
  *								1. intersection1;1;0
  *								2. intersection2;1;0
- *					5. Changing intersection mode to SPECIAL:
+ *					5. Changing intersection mode to FIXED_SYNC:
  *								1. intersection1;1;2
  *								2. intersection2;1;2
- *					6. Changing intersection mode to FIXED_SYNC:
- *								1. intersection1;1;3
- *								2. intersection2;1;3
+ *					6. Changing intersection mode to SPECIAL:
+ *								1. intersection1;1;3;4
+ *								2. intersection2;1;3;10
  *					7. Changing timings of intersection lights:
  *								1. intersection1;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
  *					8. Stopping the server, ensuring proper detach of the server

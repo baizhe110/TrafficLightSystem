@@ -16,11 +16,32 @@ enum INTERSECTION_TYPE {
 /* Example intersection input
 
 change the timing: 	intersection2;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
-change the mode:	intersection1;1;2
+change to SENSOR:	intersection1;1;1
+change to SYNCED:	intersection1;1;2
 change the mode of boomgate: boom;1;1
 change the mode:	intersection2;1;1
 special mode:		intersection2;1;3;4
 change the mode of boomgate: boom;1;0
+					1. Changing boom gate mode to SPECIAL:
+ *								1. boom;1;1
+ *					2. Changing boom gate mode to NORMAL:
+ *								2. boom;1;0
+ *					3. Changing intersection mode to SENSOR:
+ *								1. intersection1;1;1
+ *								2. intersection2;1;1
+ *					4. Changing intersection mode to FIXED:
+ *								1. intersection1;1;0
+ *								2. intersection2;1;0
+ *					5. Changing intersection mode to FIXED_SYNC:
+ *								1. intersection1;1;2
+ *								2. intersection2;1;2
+ *					6. Changing intersection mode to SPECIAL:
+ *								1. intersection1;1;3;4
+ *								2. intersection2;1;3;10
+ *					7. Changing timings of intersection lights:
+ *								1. intersection1;2;10,2,3,4,5,6,7,10,9,10,11,12,13,14
+ *					8. Stopping the server, ensuring proper detach of the server
+ *								1. stop
 */
 //#define attachPoint "/net/VM_x86_Target02/dev/name/local/CentralServer"
 //#define attachPointSem "/net/VM_x86_Target02/dev/sem/sync"
@@ -30,8 +51,8 @@ change the mode of boomgate: boom;1;0
 //#define attachPointSem "/net/EA42e8b8/dev/sem/sync"
 
 //#define attachPoint "/net/GerardHost/dev/name/local/CentralServer"
-#define intersectionType Intersection1
-#define intersectionString "Intersection 1"
+#define intersectionType Intersection2
+#define intersectionString "Intersection 2"
 
 #include <semaphore.h>
 

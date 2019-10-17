@@ -1,11 +1,13 @@
-/*
- * display.c
+/*********************************************************************
+ *						DISPLAY AND INTERFACE WITH DE10-NANO HARDWARE
  *
- *  Created on: 16 Oct 2019
- *      Author: bruno
- */
+ * 				Includes:
+ * 					1. Update the Intersection Outputs and Inputs
+ *********************************************************************/
+
 #include <pthread.h>
 #include "display.h"
+#include "SensorLightSequence.h"
 
 void *updateIntersection(void *notused)
 {
@@ -145,7 +147,7 @@ void *updateIntersection(void *notused)
 			}
 			if (TrainApproachint == 1)
 			{
-				printf("Value Train %d\n", TrainApproachint);
+				//printf("Value Train %d\n", TrainApproachint);
 				val |= 1<<TrainR1;
 			}
 			out32(gpio_LEDs, val);
@@ -164,20 +166,15 @@ void *updateIntersection(void *notused)
 				val |= 1<<TrainR2;
 			}
 			out32(gpio_LEDs, val);
-			usleep(80000);
 		}
+		usleep(80000);
 		if (TrainApproachint == 0) {
 			val &= ~(1<<TrainR1 | 1<<TrainR2);
 		}
-		//val  = in32(h2p_lw_button_addr);
-		//val = (val&1<<2)>>2;
-		//printf("original value of GPIO_1 output enable register= %#010x\n", val);
-		//val= 1<<2 | val<<9;
-		//printf("original value of GPIO_1 output enable register= %#010x\n", val);
 		out32(gpio_LEDs, val); // write new value
 
 		val  = in32(gpio_button_inputs);
-		//printf("original value of GPIO_1 output enable register= %#010x\n", val);
+		// read the button input
 		if(((val>>EWTButton)&1) == 0)
 		{
 			currentSensor = EWT_sensor;
@@ -202,7 +199,6 @@ void *updateIntersection(void *notused)
 		{
 			currentSensor = NS_sensor;
 		}
-		usleep(80000);
 		//MsgReceive(chid, NULL, NULL, NULL);
 	}
 

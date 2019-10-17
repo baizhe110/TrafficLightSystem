@@ -193,6 +193,7 @@ void *keyboard(void *notused)
 		pthread_mutex_lock(&mutex);
 		strcpy(NewTrainGlobal,NewTrainKey);
 		pthread_mutex_unlock(&mutex);
+		printf("Done Reading input\n");
 	}
 }
 
@@ -405,7 +406,7 @@ void *ClientBoomGate(void *notused){
 		if (MsgSend(server_coid, &msg, sizeof(msg), &reply, sizeof(reply)) == -1)
 		{
 			printf(" Error data '%d' NOT sent to server\n", msg.data);
-			if (errno==3) {
+			if (errno!=0) {
 				printf("trying to reconnect to server");
 				while((server_coid = name_open(QNET_ATTACH_POINT, 0)) == -1)
 				{
