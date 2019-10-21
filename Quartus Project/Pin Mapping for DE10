@@ -1,0 +1,43 @@
+1 = 
+3 = 
+5 = 
+7 = EWPedButton [2]
+9 = Train_red_2 ( working)
+GND
+11 = 
+13 = Train_red_1
+15 = EWTR
+17 = 
+19 = EWTY
+21 = NSTButton [4]
+23 = EWTG
+25 = EWG
+GND
+27 = EWY
+29 = 
+31 = EWR
+33 = NSButton [3]
+35 = NSPedButton [5]
+
+0 = 
+2 = NSPedR
+4 = EWPedG
+6 = EWPedR
+8 = 
+
+10 = NSR
+12 = NSY
+14 = 
+16 = NSG
+18 = NSTG
+20 = NSTY
+22 = 
+24 = NSTR
+
+26 = NSPedG
+28 = 
+30 = EWButton [0]
+32 = EWTButton [1]
+34 = 
+
+export PATH=$PATH:/cygdrive/c/intelFPGA_lite/18.1/quartus/sopc_builder/bin
